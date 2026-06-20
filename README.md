@@ -98,6 +98,28 @@ The harness doesn't care what workflow you're tuning. It only cares about:
 
 Swap any of those and the loop keeps working.
 
+## Examples
+
+The `examples/` directory contains self-contained real-SBOSS workflow targets. Each one
+follows the same 3-file pattern and can be iterated on independently.
+
+| Example | What | Baseline | Source of truth |
+|---|---|---|---|
+| `examples/hhvh/` | **ՀՎՀՀ (Armenian taxpayer id) validation** | 96.67 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/localization.js` |
+
+### `examples/hhvh/` — Armenian taxpayer id validation
+
+A faithful Python port of `validateHvhh()` from A1-Localization-AM, plus a known-weakness
+eval set that flags the JS reference's missing pre-normalization length check. The agent's
+job: fix the bug to hit 100, then research and implement the official Armenian HHVH
+check-digit algorithm (currently a TODO seam in the JS).
+
+```bash
+cd examples/hhvh
+python3 eval.py             # baseline: 96.67
+# then point an agent at program.md
+```
+
 ## Related
 
 - [karpathy/autoresearch](https://github.com/karpathy/autoresearch) — the original
