@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T22:15:00Z	baseline	keep	100.0000	0.00	baseline: faithful Python port of phone.js from A1-Localization-RU. Russia country code +7, 10-digit NSN, validates 3-9 first digit (3-8 geographic, 9 mobile). 12 cases x 4 fields (nsn, valid, e164, formatted) all pass on first run.
