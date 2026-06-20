@@ -20,6 +20,9 @@ HVHH_LENGTH = 8
 
 # Match the JS regex /[\s.\-]/g — strip ASCII whitespace, dot, hyphen.
 _SEPARATOR_RE = re.compile(r"[\s.\-]")
+# Non-whitespace separators (dot, hyphen) — their presence triggers the
+# pre-normalization structural check (digit groups must be 3-3-2 or single 8).
+_INNER_SEPARATOR_RE = re.compile(r"[.\-]")
 _ALL_DIGITS_RE = re.compile(r"^[0-9]+$")
 _ALL_SAME_RE = re.compile(r"^(\d)\1{7}$")
 
@@ -29,6 +32,33 @@ def normalize_hvhh(value: Any) -> str:
     if value is None:
         return ""
     return _SEPARATOR_RE.sub("", str(value))
+
+
+def _has_canonical_grouping(raw: str) -> bool:
+    """True if the input's digit groups (split by non-whitespace separators)
+    are in a canonical HHVH format: 3-3-2 OR a single bare 8-digit group.
+
+    Examples (canonical=True):
+      '00123456'        — single 8-digit group
+      '001 234 56'      — whitespace-only, single non-empty group
+      '001-234-56'      — hyphen-split, 3+3+2
+      '001.234.56'      — dot-split, 3+3+2
+
+    Examples (canonical=False):
+      '00123-456'       — 5+3 split, suspicious typo
+      '0012-3456'       — 4+4 split, not canonical
+    """
+    if not raw:
+        return False
+    # Split by ANY separator (whitespace + dot + hyphen). Empty groups from
+    # leading/trailing/consecutive whitespace are ignored.
+    groups = [g for g in _SEPARATOR_RE.split(raw) if g]
+    if not groups:
+        return False
+    if len(groups) == 1:
+        return len(groups[0]) == HVHH_LENGTH and _ALL_DIGITS_RE.match(groups[0]) is not None
+    # Multiple groups — must be exactly 3+3+2 (the canonical human-typed format).
+    return [len(g) for g in groups] == [3, 3, 2]
 
 
 def _default_check_digit(hvhh: str) -> bool:
@@ -62,11 +92,19 @@ def validate_hvhh(value: Any, *, check_digit_verifier=None) -> dict[str, Any]:
     """
     verifier = check_digit_verifier if check_digit_verifier is not None else _default_check_digit
 
+    raw_str = "" if value is None else str(value)
     normalized = normalize_hvhh(value)
     if not normalized:
         return {"ok": False, "normalized": "", "error": "ՀՎՀՀ-ն պարտադիր է"}
     if not _ALL_DIGITS_RE.match(normalized):
         return {"ok": False, "normalized": normalized, "error": "ՀՎՀՀ-ն պետք է պարունակի միայն թվանշաններ"}
+    # Pre-normalization structural check: if the raw input has a non-whitespace
+    # separator (hyphen / dot), the digit groups must be 3-3-2 OR a single 8-digit
+    # group. The JS reference silently inflates "00123-456" (5+3 typo) into a valid
+    # 8-digit string, masking user typos. Catching this here is the agent's main
+    # first-move improvement.
+    if _INNER_SEPARATOR_RE.search(raw_str) and not _has_canonical_grouping(raw_str):
+        return {"ok": False, "normalized": normalized, "error": f"ՀՎՀՀ-ն պետք է լինի {HVHH_LENGTH} նիշ"}
     if len(normalized) != HVHH_LENGTH:
         return {"ok": False, "normalized": normalized, "error": f"ՀՎՀՀ-ն պետք է լինի {HVHH_LENGTH} նիշ"}
     if _ALL_SAME_RE.match(normalized):
