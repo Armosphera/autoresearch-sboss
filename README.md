@@ -67,6 +67,23 @@ Let's do the setup first.
 Expect ~60 experiments/hour and ~500 experiments overnight. Reverts are the norm — keep rate
 typically 5-15% depending on the workflow.
 
+## Karpathy Eval Harness
+
+This repo also exposes the shared A1 product-research runner, pinned to
+`SamStep74/A1-AI-Core@f917e8a1fd72d48d6e227300a0c069c70ace6f1e`. The local shim uses that cached
+clean clone by default. Set `A1_AI_CORE_CACHE_DIR` to choose the cache location, or set
+`A1_AI_CORE_PATH` to an explicit checkout at the pinned commit.
+
+```bash
+npm run karpathy:list
+npm run karpathy:program -- invoice-extractor-contract
+npm run karpathy:run -- invoice-extractor-contract --best 100
+node scripts/check-invoice-extractor-contract.mjs
+```
+
+The `invoice-extractor-contract` keeps the root invoice workflow on the deterministic mock path:
+`workflow.py` is the editable surface, while `eval.py` and `eval_set.json` remain fixed guardrails.
+
 ## Design choices
 
 - **One file to modify.** The agent only touches `workflow.py`. Diffs stay reviewable.

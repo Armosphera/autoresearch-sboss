@@ -1,0 +1,41 @@
+{
+  "id": "invoice-extractor-contract",
+  "productName": "Armosphera autoresearch SBOSS invoice extractor",
+  "runTag": "2026-06-20-invoice-extractor-contract",
+  "branchPrefix": "karpathy/",
+  "editableFiles": [
+    "workflow.py"
+  ],
+  "readOnlyFiles": [
+    "scripts/check-invoice-extractor-contract.mjs",
+    "eval.py",
+    "eval_set.json"
+  ],
+  "contextFiles": [
+    "README.md",
+    "program.md",
+    "workflow.py",
+    "pyproject.toml"
+  ],
+  "guardrails": [
+    "Keep the root eval deterministic by default; do not require live LLM credentials for baseline scoring.",
+    "Keep invoice extraction output fields vendor_name, invoice_date, total_amount, currency, and tax_id aligned with eval.py.",
+    "Keep score at 100 on the root mock eval set before accepting changes; prefer simpler workflow code on ties.",
+    "Do not log API keys, bearer tokens, or raw credentials in eval output or results.",
+    "Keep agents editing workflow.py only; eval.py and eval_set.json remain fixed guardrails."
+  ],
+  "eval": {
+    "command": "node",
+    "args": [
+      "scripts/check-invoice-extractor-contract.mjs"
+    ],
+    "metric": {
+      "name": "score",
+      "direction": "maximize"
+    },
+    "successMetricValue": 100,
+    "failureMetricValue": 0,
+    "timeBudgetMinutes": 5,
+    "timeoutMinutes": 10
+  }
+}
