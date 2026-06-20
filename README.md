@@ -118,6 +118,10 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/chat-client/` | **OpenRouter chat-completions client** (callModel / callVision / callStructured, OpenAI-compatible, mockable safeFetch) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/chat.js` |
 | `examples/phone-ru/` | **Russian phone normalization** (+7, 8XXX, 10-digit NSN, 3-9 first-digit invariant) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/phone.js` |
 | `examples/ru-einvoice/` | **Russian e-invoice validator (счёт-фактура / УПД)** (19 error codes, 2026 tax reform base 22%, ИНН + КПП + rates [0, 10, 22]) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/einvoice.js` |
+| `examples/payroll-ru/` | **Russian payroll (НДФЛ + страх. взносы)** (5-band progressive 13/15/18/20/22%, unified 30% + МСП 1.5×МРОТ) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/payroll.js` |
+| `examples/regions-ru/` | **Russian federal subjects** (83 субъекта, ISO 3166-2:RU, 2 federal cities + 21 republics + 9 krais + 46 oblasts + 4 okrugs) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/regions.js` |
+| `examples/chart-of-accounts-ru/` | **Russian План счетов (94н)** (73 accounts, 8 sections + off-balance, section by number range not leading digit) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/chartOfAccounts.js` |
+| `examples/vat-ru/` | **Russian VAT engine (2026 reform)** (rates [0, 10, 22] + УСН [5, 7], year-keyed, gross↔net settlement math) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/vat.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -339,6 +343,80 @@ test-data fix (the JS contract is `vatAmount = net*rate/100`, not
 
 ```bash
 cd examples/ru-einvoice
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/payroll-ru/` — Russian payroll (НДФЛ + страховые взносы)
+
+Faithful Python port of `payroll.js` from
+[Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU).
+Russian payroll — НДФЛ (employee withholding) + страховые взносы (employer
+contributions), 2026. **НДФЛ** (ст. 224 НК РФ): 5-band progressive marginal
+scale on cumulative annual base (13%/15%/18%/20%/22%). Non-residents flat 30%.
+**Страховые взносы** (ст. 425 НК РФ): unified 30% within ЕПВБ (=2,979,000
+in 2026), 15.1% above. **МСП** reduced (ст. 427): 30% within 1.5×МРОТ monthly,
+15% above. **Child standard deductions** (ст. 218 НК РФ): 1st/2nd/3rd +
+disabled child. Cap at 450,000 YTD income. **Baseline 100.00** on first run.
+Agent's job: add `audit` field (per-call trace), `summary` field, multi-
+employee batch, year-keyed rates.
+
+```bash
+cd examples/payroll-ru
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/regions-ru/` — Russian federal subjects
+
+Faithful Python port of `regions.js` from
+[Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU).
+**83 federal subjects** keyed on ISO 3166-2:RU: 2 cities of federal
+significance (Москва, СПб), 21 republics, 9 krais, 46 oblasts, 1
+autonomous oblast, 4 autonomous okrugs. Pure data + lookups in
+`data.json`. **Baseline 100.00** on first run. Agent's job: add
+`type` discriminator, `cities` field, federal-district grouping (8
+districts), `regionByFederalDistrict` reverse lookup.
+
+```bash
+cd examples/regions-ru
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/chart-of-accounts-ru/` — Russian План счетов (94н)
+
+Faithful Python port of `chartOfAccounts.js` from
+[Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU).
+Russian chart of accounts per Приказ Минфина РФ № 94н от 31.10.2000.
+**73 accounts** in 9 sections (8 balance-sheet I-VIII + off-balance) +
+`data.json` + `sections.json`. Section is determined by **number range**
+(01-09=I, 10-19=II, ... 90-99=VIII), not by leading digit like the AM chart.
+Off-balance accounts use 3-digit codes (001-011). ХАРАКТЕР (active/passive/
+active-passive) maps to normal balance (debit/credit/null). **Baseline
+100.00** on first run. Agent's job: sub-accounts (3-level codes like
+"01.01"), `sectionOf` via run_workflow, per-section nature rollup.
+
+```bash
+cd examples/chart-of-accounts-ru
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/vat-ru/` — Russian VAT engine (2026 reform)
+
+Faithful Python port of `vat.js` from
+[Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU).
+**2026 налоговая реформа:** base rate 20% → 22% (effective 2026-01-01).
+Reduced 10% (food/children/medical), 0% (export), УСН 5%/7% for simplified
+regime. Year-keyed (2025 back-dated at 20%, 2027+ defaults to 2026).
+5 functions: ratesFor, vatFromNet, vatFromGross (settlement rate r/(100+r),
+e.g. 22/122), netFromGross, isValidVatRate. **Baseline 100.00** on first
+run. Agent's job: `audit` field (per-call trace), `summary` field, batch
+rollup, year-aware validators.
+
+```bash
+cd examples/vat-ru
 python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
