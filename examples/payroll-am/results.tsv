@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T19:00:00Z	baseline	keep	100.0000	0.00	baseline: faithful Python port of computePayroll() from A1-Localization-AM@src/armeniaPayroll.js. 4 components (income tax 20%, pension tiered 5%/10%-25k cap 87500, stamp duty flat 1000, health insurance 0/4800/10800). All 20 cases match JS exactly across 7 fields. No bugs to fix — agent's job is to ADD capabilities (warnings, effectiveRate, annual projection, employer-side contributions).
