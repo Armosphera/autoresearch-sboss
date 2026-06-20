@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T22:55:00Z	baseline	keep	100.0000	0.00	baseline: faithful Python port of vat.js from A1-Localization-RU. 2026 налоговая реформа: 20%->22% base, 10% reduced, 0% export, УСН 5%/7%. 5 functions (ratesFor, vatFromNet, vatFromGross, netFromGross, isValidVatRate). 20 cases per-case field set, all 100. Year-keyed rates (2025=20%, 2026=22%). Note: significant overlap with the ratesFor/vatFromNet inlined in ru-einvoice/workflow.py.
