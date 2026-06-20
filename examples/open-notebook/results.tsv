@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T23:55:00Z	baseline	keep	100.0000	0.00	baseline: faithful Python port of open-notebook.js from A1-AI-Core. 75 lines JS, RAG connector with safeFetch injection. 3 operations (isEnabled, normalizeResults, search), tolerates 4 response shapes ({results}|{sources}|{data}|array). 16 cases x 11 fields covering enabled states, all 4 normalize shapes, no-text filter, k-cap, search with disabled/empty/HTTP200/HTTP500/throws/apiKey/custom searchPath. 3rd LLM-shaped example (chat-client, model-catalog, open-notebook).
