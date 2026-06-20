@@ -70,7 +70,7 @@ typically 5-15% depending on the workflow.
 ## Karpathy Eval Harness
 
 This repo also exposes the shared A1 product-research runner, pinned to
-`SamStep74/A1-AI-Core@f917e8a1fd72d48d6e227300a0c069c70ace6f1e`. The local shim uses that cached
+`Armosphera/A1-AI-Core@f917e8a1fd72d48d6e227300a0c069c70ace6f1e`. The local shim uses that cached
 clean clone by default. Set `A1_AI_CORE_CACHE_DIR` to choose the cache location, or set
 `A1_AI_CORE_PATH` to an explicit checkout at the pinned commit.
 
@@ -124,7 +124,7 @@ follows the same 3-file pattern and can be iterated on independently.
 |---|---|---|---|
 | `examples/hhvh/` | **ՀՎՀՀ (Armenian taxpayer id) validation** | 96.67 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/localization.js` |
 | `examples/ru-identifiers/` | **5 Russian business id validators (ИНН / КПП / ОГРН / ОГРНИП / СНИЛС)** | 85.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/inn.js` |
-| `examples/model-policy/` | **A1 model policy resolver** (per-module / per-aspect precedence) | 50.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/model-policy.js` |
+| `examples/model-policy/` | **A1 model policy resolver** (per-module / per-aspect precedence) | 50.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/model-policy.js` |
 | `examples/vat-return/` | **Armenian VAT return computation** (output − input = payable to SRC) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
 | `examples/payroll-am/` | **Armenian payroll rules engine** (4 employee withholdings → net) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPayroll.js` |
 | `examples/chart-of-accounts-am/` | **Armenian chart of accounts** (623 accounts, 9 classes) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaChartOfAccounts.js` |
@@ -132,18 +132,18 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/phone-am/` | **Armenian phone normalization** (+374, 00374, 091234567, etc.) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPhone.js` |
 | `examples/regions-am/` | **Armenian administrative regions** (11 marzes, ISO 3166-2:AM) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaRegions.js` |
 | `examples/einvoice-am/` | **Armenian e-invoice validator** (16 error codes, pre-SRC submission compliance gate) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/einvoice.js` |
-| `examples/chat-client/` | **OpenRouter chat-completions client** (callModel / callVision / callStructured, OpenAI-compatible, mockable safeFetch) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/chat.js` |
+| `examples/chat-client/` | **OpenRouter chat-completions client** (callModel / callVision / callStructured, OpenAI-compatible, mockable safeFetch) | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/chat.js` |
 | `examples/phone-ru/` | **Russian phone normalization** (+7, 8XXX, 10-digit NSN, 3-9 first-digit invariant) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/phone.js` |
 | `examples/ru-einvoice/` | **Russian e-invoice validator (счёт-фактура / УПД)** (19 error codes, 2026 tax reform base 22%, ИНН + КПП + rates [0, 10, 22]) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/einvoice.js` |
 | `examples/payroll-ru/` | **Russian payroll (НДФЛ + страх. взносы)** (5-band progressive 13/15/18/20/22%, unified 30% + МСП 1.5×МРОТ) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/payroll.js` |
 | `examples/regions-ru/` | **Russian federal subjects** (83 субъекта, ISO 3166-2:RU, 2 federal cities + 21 republics + 9 krais + 46 oblasts + 4 okrugs) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/regions.js` |
 | `examples/chart-of-accounts-ru/` | **Russian План счетов (94н)** (73 accounts, 8 sections + off-balance, section by number range not leading digit) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/chartOfAccounts.js` |
 | `examples/vat-ru/` | **Russian VAT engine (2026 reform)** (rates [0, 10, 22] + УСН [5, 7], year-keyed, gross↔net settlement math) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/vat.js` |
-| `examples/settings-store/` | **AI settings store** (file-backed JSON, 0600 perms, redactedForClient, resolveModelPolicy) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/settings-store.js` |
-| `examples/model-catalog/` | **OpenRouter model catalog** (injected safeFetch + isEgressAllowed, FALLBACK_MODELS, never throws) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/model-catalog.js` |
-| `examples/supplemental-sources/` | **Advisory source policy** (dedupe by sourceUrl‖title, score sort, cap 3, 280-char excerpt) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/supplemental.js` |
-| `examples/open-notebook/` | **Open Notebook RAG connector** (opt-in, egress-gated, non-throwing, tolerates 4 response shapes) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/open-notebook.js` |
-| `examples/product-research/` | **Autoresearch primitives** (8 ops: normalizeConfig, renderProgram, decide, TSV I/O) — *the most meta example* | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/product-research.js` |
+| `examples/settings-store/` | **AI settings store** (file-backed JSON, 0600 perms, redactedForClient, resolveModelPolicy) | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/settings-store.js` |
+| `examples/model-catalog/` | **OpenRouter model catalog** (injected safeFetch + isEgressAllowed, FALLBACK_MODELS, never throws) | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/model-catalog.js` |
+| `examples/supplemental-sources/` | **Advisory source policy** (dedupe by sourceUrl‖title, score sort, cap 3, 280-char excerpt) | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/supplemental.js` |
+| `examples/open-notebook/` | **Open Notebook RAG connector** (opt-in, egress-gated, non-throwing, tolerates 4 response shapes) | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/open-notebook.js` |
+| `examples/product-research/` | **Autoresearch primitives** (8 ops: normalizeConfig, renderProgram, decide, TSV I/O) — *the most meta example* | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/product-research.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -312,7 +312,7 @@ python3 eval.py             # baseline: 100.00
 
 The first **LLM-shaped** target in the suite (the rest are pure-function
 validators). Port of `createChatClient()` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/chat.js`.
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/chat.js`.
 OpenAI-compatible chat-completions client: 3 methods (`callModel`, `callVision`,
 `callStructured`), typed `HttpError {statusCode, code, message}`, framework-
 agnostic — the egress-gated `safeFetch` is INJECTED so the host product
@@ -446,7 +446,7 @@ python3 eval.py             # baseline: 100.00
 ### `examples/settings-store/` — AI settings store
 
 Faithful Python port of `settings-store.js` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core).
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core).
 Local file-backed AI settings (local-first): the single OpenRouter API key,
 the per-aspect model policy, and the opt-in Open Notebook connector. Stored
 as JSON with 0600 perms in a product-provided data dir. **5 ops:**
@@ -468,7 +468,7 @@ python3 eval.py             # baseline: 100.00
 ### `examples/model-catalog/` — OpenRouter model catalog
 
 Faithful Python port of `model-catalog.js` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core). Live
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core). Live
 OpenRouter `/models` catalog with injected `safeFetch` + `isEgressAllowed`.
 Framework-agnostic. `list_models()` returns `{online, source, reason?, models}`
 and **NEVER throws** — degrades to bundled `FALLBACK_MODELS` (5 entries: Claude
@@ -487,7 +487,7 @@ python3 eval.py             # baseline: 100.00
 ### `examples/supplemental-sources/` — Advisory source policy
 
 Faithful Python port of `supplemental.js` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core). Advisory-only
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core). Advisory-only
 "supplemental sources" policy — e.g. Open Notebook hits shown BESIDE a
 product's authoritative citations. Pure (no I/O). Smallest example in the
 suite (44 lines JS, ~80 lines Python). Cap (3) / dedupe key (sourceUrl‖title) /
@@ -505,7 +505,7 @@ python3 eval.py             # baseline: 100.00
 ### `examples/open-notebook/` — Open Notebook RAG connector
 
 Faithful Python port of `open-notebook.js` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core). Connector
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core). Connector
 for lfnovo/open-notebook — opt-in AI source that sits BESIDE a product's
 local RAG. **3 ops:** `isEnabled`, `normalizeResults` (tolerates 4 response
 shapes: `{results}|{sources}|{data}|array`), `createOpenNotebook` +
@@ -527,7 +527,7 @@ python3 eval.py             # baseline: 100.00
 
 **The most meta example** — these are the primitives autoresearch itself
 uses. Faithful Python port of `product-research.js` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core). Pure
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core). Pure
 helpers (no I/O, no shells, no model calls) for rendering the agent
 program, comparing fixed-budget eval results, and recording experiment
 rows in a stable TSV format. **8 ops:** `normalizeConfig`,
@@ -551,7 +551,7 @@ python3 eval.py             # baseline: 100.00
 - [karpathy/autoresearch](https://github.com/karpathy/autoresearch) — the original
 - [miolini/autoresearch-macos](https://github.com/miolini/autoresearch-macos) — PyTorch + MPS fork
 - [trevin-creator/autoresearch-mlx](https://github.com/trevin-creator/autoresearch-mlx) — Apple MLX fork
-- [A1-Suite](https://github.com/samstep74/A1-Platform) — the SBOSS product this is built for
+- [A1-Suite](https://github.com/Armosphera/A1-Platform) — the SBOSS product this is built for
 
 ## License
 
