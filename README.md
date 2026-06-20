@@ -116,6 +116,8 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/regions-am/` | **Armenian administrative regions** (11 marzes, ISO 3166-2:AM) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaRegions.js` |
 | `examples/einvoice-am/` | **Armenian e-invoice validator** (16 error codes, pre-SRC submission compliance gate) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/einvoice.js` |
 | `examples/chat-client/` | **OpenRouter chat-completions client** (callModel / callVision / callStructured, OpenAI-compatible, mockable safeFetch) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/chat.js` |
+| `examples/phone-ru/` | **Russian phone normalization** (+7, 8XXX, 10-digit NSN, 3-9 first-digit invariant) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/phone.js` |
+| `examples/ru-einvoice/` | **Russian e-invoice validator (счёт-фактура / УПД)** (19 error codes, 2026 tax reform base 22%, ИНН + КПП + rates [0, 10, 22]) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/einvoice.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -295,6 +297,48 @@ header, request/response audit log, streaming variant, token-budget tracking.
 
 ```bash
 cd examples/chat-client
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/phone-ru/` — Russian phone normalization
+
+Faithful Python port of `phone.js` from
+[Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU).
+Russia (country code +7) uses a 10-digit NSN: 3-digit area/operator (DEF/ABC)
++ 7-digit subscriber. Domestic trunk prefix is 8 (legacy "8 (495) ..." form).
+Validates the **stable** invariant (3-9 first digit: 3-8 geographic, 9 mobile)
+rather than hard-coding operator prefixes (which change frequently). **Baseline
+100.00** on first run. Agent's job: add `mobile` / `area` / `toll_free` fields
++ `kind` discriminator (full / short / invalid).
+
+```bash
+cd examples/phone-ru
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/ru-einvoice/` — Russian e-invoice validator (счёт-фактура / УПД)
+
+Structural compliance gate for a Russian e-invoice (счёт-фактура / УПД)
+before mapping to the official ФНС XSD `ON_NSCHFDOPPR` (format 5.03, Приказ
+ФНС № ЕД-7-26/970@) and submission through an оператор ЭДО with a КЭП
+signature (63-ФЗ). Port of `einvoice.js` from
+[Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU).
+**2026 налоговая реформа:** base rate 20% → 22% (effective 2026-01-01).
+Allowed issuance rates: 0% (export), 10% (reduced: food/children/medical),
+22% (base). **~19 distinct error codes** covering number, date
+(missing/format/calendar), currency, seller (name/ИНН/КПП), buyer
+(name/ИНН/КПП), and per-line (description/quantity/net/VAT rate/VAT
+amount/VAT mismatch/total/total mismatch). **Baseline 100.00** after a
+test-data fix (the JS contract is `vatAmount = net*rate/100`, not
+`quantity*unitPrice*rate/100`). Self-contained — inlined `validateInn`/
+`isValidKpp`/`roundRub`/`ratesFor` from sibling JS files. Agent's job: add
+`severity` + `summary` + УСН regime (`regime: "usn"` allows [0, 5, 7, 10, 22])
++ cross-line consistency.
+
+```bash
+cd examples/ru-einvoice
 python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
