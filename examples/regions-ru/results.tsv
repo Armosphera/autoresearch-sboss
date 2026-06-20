@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T22:42:00Z	baseline	keep	100.0000	0.00	baseline: faithful Python port of regions.js from A1-Localization-RU. 83 federal subjects in data.json (extracted from JS via regex). ISO 3166-2:RU codes. 15 cases x 5 fields (found, code, ru, en, center) all pass on first run.
