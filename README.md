@@ -112,6 +112,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/payroll-am/` | **Armenian payroll rules engine** (4 employee withholdings → net) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPayroll.js` |
 | `examples/chart-of-accounts-am/` | **Armenian chart of accounts** (623 accounts, 9 classes) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaChartOfAccounts.js` |
 | `examples/vat-return-form/` | **VAT return form validator** (10 error codes, cross-foot checks) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
+| `examples/phone-am/` | **Armenian phone normalization** (+374, 00374, 091234567, etc.) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPhone.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -218,6 +219,23 @@ stricter checks (zero-amount lines that imply no transactions).
 
 ```bash
 cd examples/vat-return-form
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/phone-am/` — Armenian phone normalization
+
+A faithful Python port of `armeniaPhone.js` — the 4-function normalizer that takes
+any input shape (`+37491234567`, `0037491234567`, `091234567`, `91234567`,
+`+374 91 23 45 67`, `(091) 23-45-67`) down to the 8-digit National Significant Number,
+then formats as E.164 (`+37491234567`) or human-readable (`+374 91 234567`). Validates
+the stable invariant (8 digits, not starting with 0) rather than hard-coding operator
+ranges. **Baseline 100.00** on first run. Agent's job: optional `operator` field
+based on 2-digit prefix, `warning` field for near-miss inputs (typos), `region` field
+via `armeniaRegions.js` lookup.
+
+```bash
+cd examples/phone-am
 python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
