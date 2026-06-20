@@ -109,6 +109,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/ru-identifiers/` | **5 Russian business id validators (ИНН / КПП / ОГРН / ОГРНИП / СНИЛС)** | 85.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/inn.js` |
 | `examples/model-policy/` | **A1 model policy resolver** (per-module / per-aspect precedence) | 50.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/model-policy.js` |
 | `examples/vat-return/` | **Armenian VAT return computation** (output − input = payable to SRC) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
+| `examples/payroll-am/` | **Armenian payroll rules engine** (4 employee withholdings → net) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPayroll.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -166,6 +167,22 @@ an audit trail (per-line classification), multi-period aggregation, and the seco
 
 ```bash
 cd examples/vat-return
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/payroll-am/` — Armenian payroll rules engine
+
+A faithful Python port of `computePayroll()` from A1-Localization-AM. Computes
+gross → net under 2026 Armenian rules: 4 employee withholdings — income tax (flat 20%),
+pension (tiered 5%/10%−25k, capped 87,500), stamp duty (flat 1,000/mo — 2026 revision
+replaced the previous 1,500/3,000/5,500/8,500 tiers), and health insurance (banded
+0 / 4,800 / 10,800 by Dec-2025 law). **Baseline 100.00** — no bugs to fix. Agent's job:
+add warnings for negative / unrealistic gross, effective tax rate, annual projection,
+employer-side social contributions (5% up to cap).
+
+```bash
+cd examples/payroll-am
 python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
