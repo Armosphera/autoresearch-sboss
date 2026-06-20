@@ -1,0 +1,162 @@
+"""
+workflow.py — Armenian e-invoice validator, Python port.
+
+Faithful Python port of src/einvoice.js::validateEInvoice() from A1-Localization-AM.
+Structural compliance gate for an e-invoice BEFORE mapping to the official SRC XSD
+and submission. Catches 16 distinct error codes. Returns {ok, errors:[{field, code,
+message}]} and never throws on malformed input.
+
+  ISSUED_INVOICE_VAT_RATES = (0, 20)  (16.67% is imputed, VAT-return only, never issued)
+  MAX_LINE_DESCRIPTION = 256
+
+Error codes (16):
+  MISSING_TRANSACTION_TYPE, MISSING_NUMBER, MISSING_ISSUE_DATE, INVALID_ISSUE_DATE,
+  MISSING_SUPPLIER_NAME, MISSING_SUPPLIER_HVHH, INVALID_SUPPLIER_HVHH,
+  MISSING_BUYER_ID, INVALID_BUYER_HVHH, NO_LINES,
+  INVALID_LINE_DESCRIPTION, INVALID_LINE_QUANTITY, INVALID_LINE_NET,
+  INVALID_LINE_VAT_RATE, INVALID_LINE_VAT_AMOUNT, LINE_VAT_MISMATCH
+
+Source of truth (JS, MIT): https://github.com/Armosphera/A1-Localization-AM
+"""
+
+from __future__ import annotations
+
+import math
+import re
+from typing import Any
+
+EINVOICE_NAMESPACE = "urn:hayhashvapah:einvoice:1"
+ISSUED_INVOICE_VAT_RATES = (0, 20)
+MAX_LINE_DESCRIPTION = 256
+
+
+def _str(value: Any) -> str:
+    return str("" if value is None else value).strip()
+
+
+def _is_valid_hvhh(value: Any) -> bool:
+    """Mirror of isValidHvhh() from localization.js: 8 digits, not all-same."""
+    s = _str(value)
+    if not s.isdigit() or len(s) != 8:
+        return False
+    if len(set(s)) == 1:
+        return False
+    return True
+
+
+def validate_e_invoice(invoice: Any) -> dict[str, Any]:
+    """Structural compliance gate. Returns {ok, errors} -- never throws."""
+    inv = invoice if isinstance(invoice, dict) else {}
+    errors: list[dict[str, str]] = []
+
+    def add(field: str, code: str, message: str) -> None:
+        errors.append({"field": field, "code": code, "message": message})
+
+    # Transaction type -- mandatory since 2025-03-01
+    if not _str(inv.get("transactionType")):
+        add("transactionType", "MISSING_TRANSACTION_TYPE",
+            "Transaction type is mandatory for SRC e-invoices since 2025-03-01.")
+
+    # Invoice number/series
+    if not _str(inv.get("number")):
+        add("number", "MISSING_NUMBER", "Invoice number/series is required.")
+
+    # Issue date (ISO YYYY-MM-DD prefix check, matching JS)
+    issue_date = _str(inv.get("issueDate"))
+    if not issue_date:
+        add("issueDate", "MISSING_ISSUE_DATE", "Issue date is required.")
+    elif not re.match(r"^\d{4}-\d{2}-\d{2}", issue_date):
+        add("issueDate", "INVALID_ISSUE_DATE", "Issue date must be ISO format (YYYY-MM-DD).")
+
+    # Supplier
+    supplier = inv.get("supplier") if isinstance(inv.get("supplier"), dict) else {}
+    if not _str(supplier.get("name")):
+        add("supplier.name", "MISSING_SUPPLIER_NAME", "Supplier name is required.")
+    supplier_hvhh = _str(supplier.get("hvhh") or supplier.get("taxId"))
+    if not supplier_hvhh:
+        add("supplier.hvhh", "MISSING_SUPPLIER_HVHH", "Supplier HHVH (tax ID) is required.")
+    elif not _is_valid_hvhh(supplier_hvhh):
+        add("supplier.hvhh", "INVALID_SUPPLIER_HVHH", "Supplier HHVH is malformed (expected 8 digits).")
+
+    # Buyer -- HHVH (organization) OR passport (individual)
+    buyer = inv.get("buyer") if isinstance(inv.get("buyer"), dict) else {}
+    buyer_hvhh = _str(buyer.get("hvhh") or buyer.get("taxId"))
+    buyer_passport = _str(buyer.get("passport"))
+    if not buyer_hvhh and not buyer_passport:
+        add("buyer", "MISSING_BUYER_ID",
+            "Buyer must be identified by HHVH (organization) or passport (individual).")
+    elif buyer_hvhh and not _is_valid_hvhh(buyer_hvhh):
+        add("buyer.hvhh", "INVALID_BUYER_HVHH", "Buyer HHVH is malformed (expected 8 digits).")
+
+    # Lines
+    lines = inv.get("lines") if isinstance(inv.get("lines"), list) else []
+    if not lines:
+        add("lines", "NO_LINES", "At least one invoice line is required.")
+    else:
+        for i, line in enumerate(lines):
+            pos = i + 1
+            l = line if isinstance(line, dict) else {}
+            description = _str(l.get("description"))
+            if not description or len(description) > MAX_LINE_DESCRIPTION:
+                add(f"lines[{pos}].description", "INVALID_LINE_DESCRIPTION",
+                    f"Line description is required and must be <= {MAX_LINE_DESCRIPTION} characters.")
+
+            raw_qty = l.get("quantity") if l.get("quantity") is not None else 1
+            try:
+                quantity = float(raw_qty)
+            except (TypeError, ValueError):
+                quantity = float("nan")
+            if not math.isfinite(quantity) or quantity <= 0:
+                add(f"lines[{pos}].quantity", "INVALID_LINE_QUANTITY",
+                    "Line quantity must be a positive number.")
+
+            raw_net = l.get("netAmount") if l.get("netAmount") is not None else 0
+            try:
+                net = float(raw_net)
+            except (TypeError, ValueError):
+                net = float("nan")
+            if not math.isfinite(net) or net < 0:
+                add(f"lines[{pos}].netAmount", "INVALID_LINE_NET",
+                    "Line net amount must be a non-negative number.")
+
+            rate_raw = l.get("vatRate")
+            try:
+                rate = float(rate_raw) if rate_raw is not None and _str(rate_raw) != "" else 0
+            except (TypeError, ValueError):
+                rate = float("nan")
+            if rate not in ISSUED_INVOICE_VAT_RATES or not math.isfinite(rate):
+                rates_str = "% or ".join(str(r) for r in ISSUED_INVOICE_VAT_RATES) + "%"
+                add(f"lines[{pos}].vatRate", "INVALID_LINE_VAT_RATE",
+                    f"Line VAT rate must be {rates_str} (16.67% is imputed -- VAT-return only).")
+
+            # Optional explicit vatAmount -- if present, must be a number AND consistent
+            if "vatAmount" in l and l["vatAmount"] is not None and _str(l["vatAmount"]) != "":
+                try:
+                    declared_vat = float(l["vatAmount"])
+                except (TypeError, ValueError):
+                    declared_vat = float("nan")
+                if not math.isfinite(declared_vat):
+                    add(f"lines[{pos}].vatAmount", "INVALID_LINE_VAT_AMOUNT",
+                        "Line VAT amount must be a number.")
+                else:
+                    raw = (net * rate) / 100
+                    expected_vat = math.floor(raw + 0.5) if raw >= 0 else -math.floor(-raw + 0.5)
+                    if abs(declared_vat - expected_vat) > 1:
+                        add(f"lines[{pos}].vatAmount", "LINE_VAT_MISMATCH",
+                            f"Line VAT amount {declared_vat} is inconsistent with {rate}% of net {net} (expected ~{expected_vat}).")
+
+    return {"ok": len(errors) == 0, "errors": errors}
+
+
+def run_workflow(input_data: dict[str, Any]) -> dict[str, Any]:
+    """Adapter for eval.py. Takes {"invoice": {...}}, returns {ok, error_count, error_codes}."""
+    invoice = input_data.get("invoice") if isinstance(input_data, dict) else input_data
+    result = validate_e_invoice(invoice)
+    seen: set[str] = set()
+    for e in result["errors"]:
+        seen.add(e["code"])
+    return {
+        "ok": result["ok"],
+        "error_count": len(result["errors"]),
+        "error_codes": sorted(seen),
+    }
