@@ -107,6 +107,7 @@ follows the same 3-file pattern and can be iterated on independently.
 |---|---|---|---|
 | `examples/hhvh/` | **ՀՎՀՀ (Armenian taxpayer id) validation** | 96.67 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/localization.js` |
 | `examples/ru-identifiers/` | **5 Russian business id validators (ИНН / КПП / ОГРН / ОГРНИП / СНИЛС)** | 85.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/inn.js` |
+| `examples/model-policy/` | **A1 model policy resolver** (per-module / per-aspect precedence) | 50.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/model-policy.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -133,6 +134,21 @@ dispatcher to hit 100, then improve error messages and edge cases.
 ```bash
 cd examples/ru-identifiers
 python3 eval.py             # baseline: 85.00
+# then point an agent at program.md
+```
+
+### `examples/model-policy/` — A1 model policy resolver
+
+A faithful Python port of `resolveModelForRequest()` from `@a1/ai`, the SBOSS AI provider
+core. The JS returns only the resolved model id — this baseline adds a `source` field
+("module" / "aspect" / "default" / "auto") as the agent's first lever. Baseline 50.00 =
+resolved_model matches JS everywhere (100%) + source missing everywhere (0%). After fixing
+source → 100, the agent can add cost-aware or LLM-based routing using OpenRouter pricing
+data from the fallback catalog.
+
+```bash
+cd examples/model-policy
+python3 eval.py             # baseline: 50.00
 # then point an agent at program.md
 ```
 
