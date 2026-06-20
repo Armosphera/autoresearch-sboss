@@ -1,3 +1,4 @@
 timestamp	commit	status	score	budget_sec	description
 2026-06-20T17:59:30Z	baseline	keep	96.6667	0.00	baseline: faithful Python port of validateHvhh() from A1-Localization-AM@src/localization.js. Fails case #12 ("00123-456" — pre-normalization length check not in JS reference)
 2026-06-21T00:25:00Z	$(git rev-parse --short HEAD)	keep	100.0000	0.00	first-move fix: added pre-normalization structural check (digit groups must be 3-3-2 or single 8-digit group when non-whitespace separators are present). Catches '00123-456' (5+3 typo) which JS silently inflates. New helper _has_canonical_grouping() in workflow.py; rejected '00123-456' (5+3) while accepting '001 234 56' / '001-234-56' / '001.234.56' / '  00123456  '. 96.67 -> 100.00.
+2026-06-21T00:28:00Z	$(git rev-parse --short HEAD)	keep	100.0000	0.00	confirmed 100% via pre-norm structural check (3-3-2 grouping) — see commit f893bfd.

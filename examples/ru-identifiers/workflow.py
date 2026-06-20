@@ -211,9 +211,21 @@ def validate_identifier(value: Any) -> dict[str, Any]:
         return {"ok": False, "normalized": None, "kind": None,
                 "error": "identifier is empty"}
 
-    # КПП: only identifier with letters — disambiguate first
-    if len(s) == 9 and _KPP_RE.match(s):
-        return _validate_kpp(s)
+    # The JS reference only strips separators inside _validate_snils — the dispatcher
+    # itself rejects "7707-0838-93" (length=12, not all digits) as an unknown shape.
+    # Agent's first-move fix: strip ASCII whitespace and hyphens at the dispatcher
+    # level, matching the SNILS-level handling. Letters in КПП are preserved.
+    s_stripped = re.sub(r"[\s\-]+", "", s) if s else s
+    if not s_stripped:
+        return {"ok": False, "normalized": None, "kind": None,
+                "error": "identifier is empty"}
+
+    # КПП: only identifier with letters — disambiguate first (on the stripped form)
+    if len(s_stripped) == 9 and _KPP_RE.match(s_stripped):
+        return _validate_kpp(s_stripped)
+
+    # Use the stripped form for the digit-only dispatch + validator calls
+    s = s_stripped
 
     if _only_digits(s):
         if len(s) == 10 or len(s) == 12:

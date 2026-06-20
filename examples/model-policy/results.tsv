@@ -1,2 +1,3 @@
 timestamp	commit	status	score	budget_sec	description
 2026-06-20T18:30:00Z	baseline	keep	50.0000	0.00	baseline: faithful Python port of resolveModelForRequest() from @a1/ai model-policy.js. resolved_model=100% (matches JS), source=0% (JS doesn't return it; agent's first lever).
+2026-06-21T00:32:00Z	TBD	keep	100.0000	0.00	first-move fix: added source tracking (module/aspect/default/auto) showing which precedence rule fired. JS only returns the resolved model id; Python returns both resolved_model and source. 50.00 -> 100.00 on first experiment.

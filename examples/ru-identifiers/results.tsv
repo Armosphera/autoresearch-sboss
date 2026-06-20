@@ -1,2 +1,3 @@
 timestamp	commit	status	score	budget_sec	description
 2026-06-20T18:18:30Z	baseline	keep	85.0000	0.00	baseline: faithful Python port of src/inn.js (5 Russian id validators + dispatcher). Fails 3 cases: #7 SNILS-with-sep, #18 INN-with-hyphen, #19 OGRN-with-hyphen. JS reference strips separators only inside _validate_snils; dispatcher + other validators do not.
+2026-06-21T00:30:00Z	TBD	keep	100.0000	0.00	first-move fix: added separator stripping (whitespace + hyphen) in the dispatcher, matching the SNILS-level handling. Catches '112-233-445 95', '7707-0838-93', '10277-0013-2195' which the JS silently rejects as unknown shape. 85.00 -> 100.00 on first experiment.

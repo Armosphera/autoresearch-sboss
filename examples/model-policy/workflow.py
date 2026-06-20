@@ -80,6 +80,32 @@ def run_workflow(input_data: dict[str, Any]) -> dict[str, Any]:
     policy = input_data.get("policy", {})
     ctx = input_data.get("ctx", {})
 
-    # TODO (agent's first lever): add `source` field showing which precedence rule fired.
-    resolved = resolve_model(policy, ctx)
-    return {"resolved_model": resolved, "source": None}
+    # Agent's first-move fix: track which precedence rule fired.
+    # Mirrors the same rule order as resolve_model() but classifies the source.
+    if policy is None:
+        policy = {}
+    if ctx is None:
+        ctx = {}
+    module = ctx.get("module")
+    aspect = ctx.get("aspect")
+
+    source = "auto"
+    resolved = ""
+
+    if module and module in MODULES:
+        m = _pick(policy, module)
+        if m:
+            source = "module"
+            resolved = m
+    if not resolved and aspect and aspect in ASPECTS:
+        a = _pick(policy, aspect)
+        if a:
+            source = "aspect"
+            resolved = a
+    if not resolved:
+        d = _pick(policy, "default")
+        if d:
+            source = "default"
+            resolved = d
+
+    return {"resolved_model": resolved, "source": source}
