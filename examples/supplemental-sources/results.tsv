@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T23:45:00Z	baseline	keep	100.0000	0.00	baseline: faithful Python port of supplemental.js from A1-AI-Core. Advisory-only source policy: dedupe by sourceUrl||title, sort by score desc, cap at 3, excerpt sliced to 280. 10 cases x 6 fields (count, titles, excerpts, sourceUrls, scores, allAdvisory), all 100. Smallest example in the suite (44 lines JS, ~80 lines Python).
