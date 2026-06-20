@@ -108,6 +108,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/hhvh/` | **ՀՎՀՀ (Armenian taxpayer id) validation** | 96.67 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/localization.js` |
 | `examples/ru-identifiers/` | **5 Russian business id validators (ИНН / КПП / ОГРН / ОГРНИП / СНИЛС)** | 85.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/inn.js` |
 | `examples/model-policy/` | **A1 model policy resolver** (per-module / per-aspect precedence) | 50.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/model-policy.js` |
+| `examples/vat-return/` | **Armenian VAT return computation** (output − input = payable to SRC) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -149,6 +150,23 @@ data from the fallback catalog.
 ```bash
 cd examples/model-policy
 python3 eval.py             # baseline: 50.00
+# then point an agent at program.md
+```
+
+### `examples/vat-return/` — Armenian VAT return computation
+
+A faithful Python port of `computeVatReturn()` from A1-Localization-AM. Implements
+Armenia's VAT logic per decree N 298-Ն: output VAT (20% standard, 16.67% imputed, 0%
+zero-rated) minus recoverable input VAT = net. Positive net is payable to SRC; negative
+net is credit carried forward. **Baseline 100.00** — the JS is mathematically clean for
+valid inputs, no bugs to fix. The agent's job: make it STRICTLY MORE USEFUL by adding
+input-validation warnings (negative amounts, implausible rates, vatAmount/rate mismatch),
+an audit trail (per-line classification), multi-period aggregation, and the second
+`vatReturnForm()` function that maps onto official SRC form lines 7/9/12/13/16/17/18/21/23.
+
+```bash
+cd examples/vat-return
+python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
 
