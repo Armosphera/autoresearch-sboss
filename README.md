@@ -115,6 +115,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/phone-am/` | **Armenian phone normalization** (+374, 00374, 091234567, etc.) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPhone.js` |
 | `examples/regions-am/` | **Armenian administrative regions** (11 marzes, ISO 3166-2:AM) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaRegions.js` |
 | `examples/einvoice-am/` | **Armenian e-invoice validator** (16 error codes, pre-SRC submission compliance gate) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/einvoice.js` |
+| `examples/chat-client/` | **OpenRouter chat-completions client** (callModel / callVision / callStructured, OpenAI-compatible, mockable safeFetch) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/chat.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -275,6 +276,25 @@ checks.
 
 ```bash
 cd examples/einvoice-am
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/chat-client/` — OpenRouter chat-completions client
+
+The first **LLM-shaped** target in the suite (the rest are pure-function
+validators). Port of `createChatClient()` from
+[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/chat.js`.
+OpenAI-compatible chat-completions client: 3 methods (`callModel`, `callVision`,
+`callStructured`), typed `HttpError {statusCode, code, message}`, framework-
+agnostic — the egress-gated `safeFetch` is INJECTED so the host product
+enforces deny-until-listed. Mock `safeFetch` driven by `eval_set.json` makes
+runs deterministic (no real LLM call). **Baseline 100.00** on first run.
+Agent's job: add retry-with-backoff (429/502/503/504), `Idempotency-Key`
+header, request/response audit log, streaming variant, token-budget tracking.
+
+```bash
+cd examples/chat-client
 python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
