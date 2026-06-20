@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T19:15:00Z	baseline	keep	100.0000	0.05	baseline: faithful Python port of armeniaChartOfAccounts.js from A1-Localization-AM. Loads 623 official RA accounts from data.json. validate_code() returns structured {ok, normalized, error, account} for both valid + invalid codes. 20 cases cover all 9 classes + 4-digit sub-accounts + 10 invalid/unknown edge cases (empty, non-numeric, wrong length, well-formed but unknown). Caught + fixed: workflow returned '' instead of None for null input code.
