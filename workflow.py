@@ -106,13 +106,141 @@ def _preprocess(text: str) -> str:
 _RE_DATE_ISO = re.compile(r"\b(\d{4})-(\d{2})-(\d{2})\b")
 _RE_DATE_SLASH = re.compile(r"\b(\d{1,2})/(\d{1,2})/(\d{2,4})\b")
 _RE_DATE_DOT_EU = re.compile(r"\b(\d{1,2})\.(\d{1,2})\.(\d{2,4})\b")
+_RE_DATE_EN_MONTH = re.compile(
+    r"\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s*(\d{4})\b",
+    re.IGNORECASE,
+)
+_RE_DATE_RU_MONTH = re.compile(
+    r"\b(\d{1,2})\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)\s+(\d{4})\b",
+    re.IGNORECASE,
+)
 _RE_AMOUNT = re.compile(r"(?:total|amount|sum|итого|всего)\s*[:\-]?\s*([0-9][0-9,\.\s]*)", re.IGNORECASE)
 _RE_AMOUNT_BARE = re.compile(r"\$\s*([0-9][0-9,\.]*)|([0-9][0-9,\.]*)\s*\$")
 _RE_AMOUNT_RUB = re.compile(r"([0-9][0-9,\.\s]*)\s*(?:руб|RUB|р\.)", re.IGNORECASE)
 _RE_AMOUNT_AMD = re.compile(r"([0-9][0-9,\.\s]*)\s*(?:драм|AMD|֏)", re.IGNORECASE)
 _RE_CURRENCY = re.compile(r"\b(USD|EUR|RUB|AMD|GBP|JPY|CNY|драм|руб)\b", re.IGNORECASE)
-_RE_TAX_ID = re.compile(r"(?:tax\s*id|vat\s*id|inn|hhvh|հվհհ|инн)\s*[:\-]?\s*([A-Z0-9\-]{4,})", re.IGNORECASE)
+_RE_TAX_ID = re.compile(
+    r"(?:federal\s+tax\s+id|tax\s*id|vat\s*id|vat|ein|inn|hhvh|հվհհ|инн(?:/кпп)?)\s*[:\-]?\s*([A-ZА-Я0-9\-]{4,})",
+    re.IGNORECASE,
+)
 _RE_VENDOR_LINE = re.compile(r"^([A-Z][A-Za-z0-9\.\-& ]{2,40}(?:LLC|Ltd|Inc|Corp|Corp\.|ООО|ЗАО|ИП|ԱՁ|ՓԲԸ|ԲԸ)?)\s*$", re.MULTILINE)
+
+_EN_MONTHS = {
+    "january": 1,
+    "february": 2,
+    "march": 3,
+    "april": 4,
+    "may": 5,
+    "june": 6,
+    "july": 7,
+    "august": 8,
+    "september": 9,
+    "october": 10,
+    "november": 11,
+    "december": 12,
+}
+_RU_MONTHS = {
+    "января": 1,
+    "февраля": 2,
+    "марта": 3,
+    "апреля": 4,
+    "мая": 5,
+    "июня": 6,
+    "июля": 7,
+    "августа": 8,
+    "сентября": 9,
+    "октября": 10,
+    "ноября": 11,
+    "декабря": 12,
+}
+_AMOUNT_LINE_KEYWORDS = (
+    "total due", "amount due", "total:", "amount:", "balance due",
+    "итого к оплате", "к оплате", "сумма:", "ընդամենը",
+)
+_AMOUNT_LINE_EXCLUDE = ("subtotal", "tax (", "vat", "ндс", "ներառյալ", "unit price")
+_NUMBER_TOKEN = re.compile(r"(?:[$֏]\s*)?\d[\d,\.\s]*(?:\s*(?:USD|EUR|RUB|AMD|руб|драм))?", re.IGNORECASE)
+_VENDOR_SKIP_PREFIXES = (
+    "bill to", "ship to", "sold to", "invoice", "statement", "remit to", "payable to",
+    "счёт", "счет", "покупатель", "получатель",
+    "ապառիկ", "հաշիվ", "գնորդ",
+)
+_VENDOR_CUE = re.compile(r"\b(?:vendor|seller|supplier|from|issued by|payable to)\s*[:\-]\s*(.+)$", re.IGNORECASE)
+_COMPANY_HINT = re.compile(
+    r"(LLC|Ltd\.?|Inc\.?|Corp\.?|Corporation|Industries|Enterprises|Software|Systems|Science|Research|"
+    r"ООО|ЗАО|ИП|ԱՁ|ՓԲԸ|ԲԸ)",
+    re.IGNORECASE,
+)
+
+
+def _iso(year: str | int, month: str | int, day: str | int) -> str:
+    return f"{int(year):04d}-{int(month):02d}-{int(day):02d}"
+
+
+def _parse_amount_token(token: str) -> float | None:
+    cleaned = re.sub(r"(?:USD|EUR|RUB|AMD|руб|драм|[$֏])", "", token, flags=re.IGNORECASE).strip()
+    cleaned = cleaned.replace("\u00a0", " ").replace(" ", "")
+    if not cleaned:
+        return None
+    if "," in cleaned and "." in cleaned:
+        if cleaned.rfind(",") > cleaned.rfind("."):
+            cleaned = cleaned.replace(".", "").replace(",", ".")
+        else:
+            cleaned = cleaned.replace(",", "")
+    elif "," in cleaned:
+        head, tail = cleaned.rsplit(",", 1)
+        cleaned = f"{head.replace(',', '')}.{tail}" if len(tail) == 2 else cleaned.replace(",", "")
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
+def _extract_amount(document: str) -> float | None:
+    candidates: list[float] = []
+    for raw_line in document.splitlines():
+        line = raw_line.strip()
+        lower = line.lower()
+        if not any(keyword in lower for keyword in _AMOUNT_LINE_KEYWORDS):
+            continue
+        if any(keyword in lower for keyword in _AMOUNT_LINE_EXCLUDE):
+            continue
+        line_values = [
+            value for value in (_parse_amount_token(match.group(0)) for match in _NUMBER_TOKEN.finditer(line))
+            if value is not None
+        ]
+        if line_values:
+            candidates.append(line_values[-1])
+    if candidates:
+        return candidates[-1]
+
+    fallback: list[float] = []
+    for regex in (_RE_AMOUNT_RUB, _RE_AMOUNT_AMD, _RE_AMOUNT_BARE, _RE_AMOUNT):
+        for match in regex.finditer(document):
+            token = next((group for group in match.groups() if group), "")
+            value = _parse_amount_token(token)
+            if value is not None:
+                fallback.append(value)
+    return fallback[-1] if fallback else None
+
+
+def _extract_vendor(document: str) -> str | None:
+    fallback = None
+    for line in (part.strip() for part in document.splitlines()):
+        if not line:
+            continue
+        lower = line.lower()
+        cue = _VENDOR_CUE.search(line)
+        if cue:
+            vendor = cue.group(1).strip()
+            if vendor:
+                return vendor
+        if any(lower.startswith(prefix) for prefix in _VENDOR_SKIP_PREFIXES):
+            continue
+        if _COMPANY_HINT.search(line):
+            return line
+        if fallback is None and not re.search(r"\d{3,}|[:#]", line):
+            fallback = line
+    return fallback
 
 
 def _run_with_mock(document: str) -> dict[str, Any]:
@@ -124,12 +252,7 @@ def _run_with_mock(document: str) -> dict[str, Any]:
         "tax_id": None,
     }
 
-    # Vendor: first ALL-CAPS-ish line near the top.
-    for line in document.splitlines()[:6]:
-        m = _RE_VENDOR_LINE.match(line.strip())
-        if m:
-            out["vendor_name"] = m.group(1).strip()
-            break
+    out["vendor_name"] = _extract_vendor(document)
 
     # Date: prefer ISO, fall back to slash / dot.
     m = _RE_DATE_ISO.search(document)
@@ -141,47 +264,37 @@ def _run_with_mock(document: str) -> dict[str, Any]:
             yy = m.group(3)
             if len(yy) == 2:
                 yy = "20" + yy
-            out["invoice_date"] = f"{yy}-{int(m.group(1)):02d}-{int(m.group(2)):02d}"
+            a, b = int(m.group(1)), int(m.group(2))
+            month, day = (b, a) if a > 12 else (a, b)
+            out["invoice_date"] = _iso(yy, month, day)
         else:
             m = _RE_DATE_DOT_EU.search(document)
             if m:
                 yy = m.group(3)
                 if len(yy) == 2:
                     yy = "20" + yy
-                out["invoice_date"] = f"{yy}-{int(m.group(2)):02d}-{int(m.group(1)):02d}"
+                out["invoice_date"] = _iso(yy, m.group(2), m.group(1))
+            else:
+                m = _RE_DATE_EN_MONTH.search(document)
+                if m:
+                    out["invoice_date"] = _iso(m.group(3), _EN_MONTHS[m.group(1).lower()], m.group(2))
+                else:
+                    m = _RE_DATE_RU_MONTH.search(document)
+                    if m:
+                        out["invoice_date"] = _iso(m.group(3), _RU_MONTHS[m.group(2).lower()], m.group(1))
 
     # Currency + amount (try labeled first, then currency-symbol based).
     cur = _RE_CURRENCY.search(document)
     if cur:
-        c = cur.group(1).upper()
-        c_map = {"ДРАМ": "AMD", "РУБ": "RUB"}
-        out["currency"] = c_map.get(c, c)
+        c = cur.group(1).lower()
+        c_map = {"драм": "AMD", "руб": "RUB"}
+        out["currency"] = c_map.get(c, c.upper())
+    elif "$" in document:
+        out["currency"] = "USD"
+    elif "֏" in document or "դրամ" in document.lower():
+        out["currency"] = "AMD"
 
-    amount = None
-    m = _RE_AMOUNT.search(document)
-    if m:
-        amount = m.group(1)
-    else:
-        m = _RE_AMOUNT_BARE.search(document)
-        if m:
-            amount = m.group(1) or m.group(2)
-        else:
-            m = _RE_AMOUNT_RUB.search(document)
-            if m:
-                amount = m.group(1)
-                if out["currency"] is None:
-                    out["currency"] = "RUB"
-            else:
-                m = _RE_AMOUNT_AMD.search(document)
-                if m:
-                    amount = m.group(1)
-                    if out["currency"] is None:
-                        out["currency"] = "AMD"
-    if amount is not None:
-        try:
-            out["total_amount"] = float(amount.replace(",", "").replace(" ", ""))
-        except ValueError:
-            pass
+    out["total_amount"] = _extract_amount(document)
 
     m = _RE_TAX_ID.search(document)
     if m:
