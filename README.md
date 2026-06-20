@@ -111,6 +111,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/vat-return/` | **Armenian VAT return computation** (output − input = payable to SRC) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
 | `examples/payroll-am/` | **Armenian payroll rules engine** (4 employee withholdings → net) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPayroll.js` |
 | `examples/chart-of-accounts-am/` | **Armenian chart of accounts** (623 accounts, 9 classes) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaChartOfAccounts.js` |
+| `examples/vat-return-form/` | **VAT return form validator** (10 error codes, cross-foot checks) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -200,6 +201,23 @@ navigation, sub-accounts list, deprecated flags.
 
 ```bash
 cd examples/chart-of-accounts-am
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/vat-return-form/` — VAT return form validator
+
+The sister function of `computeVatReturn()` in the same file. Validates an assembled VAT
+return form against SRC decree N 298-Ն — catches 10 distinct error codes:
+`FORM_MISSING_LINE`, `FORM_NON_NUMERIC_AMOUNT`, `FORM_NON_INTEGER_AMOUNT`,
+`FORM_NEGATIVE_AMOUNT`, `FORM_16_BASE_MISMATCH` / `FORM_16_VAT_MISMATCH` (cross-foot),
+`FORM_21_VAT_MISMATCH`, `FORM_23_NET_MISMATCH`, `FORM_7_RATE_MISMATCH` /
+`FORM_9_RATE_MISMATCH` (plausibility bands). **Baseline 100.00.** Agent's job: add
+`severity` field per finding (error/warning/info), `summary` field for UI toasts,
+stricter checks (zero-amount lines that imply no transactions).
+
+```bash
+cd examples/vat-return-form
 python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
