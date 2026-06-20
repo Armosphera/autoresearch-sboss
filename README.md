@@ -139,6 +139,11 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/regions-ru/` | **Russian federal subjects** (83 субъекта, ISO 3166-2:RU, 2 federal cities + 21 republics + 9 krais + 46 oblasts + 4 okrugs) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/regions.js` |
 | `examples/chart-of-accounts-ru/` | **Russian План счетов (94н)** (73 accounts, 8 sections + off-balance, section by number range not leading digit) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/chartOfAccounts.js` |
 | `examples/vat-ru/` | **Russian VAT engine (2026 reform)** (rates [0, 10, 22] + УСН [5, 7], year-keyed, gross↔net settlement math) | 100.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/vat.js` |
+| `examples/settings-store/` | **AI settings store** (file-backed JSON, 0600 perms, redactedForClient, resolveModelPolicy) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/settings-store.js` |
+| `examples/model-catalog/` | **OpenRouter model catalog** (injected safeFetch + isEgressAllowed, FALLBACK_MODELS, never throws) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/model-catalog.js` |
+| `examples/supplemental-sources/` | **Advisory source policy** (dedupe by sourceUrl‖title, score sort, cap 3, 280-char excerpt) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/supplemental.js` |
+| `examples/open-notebook/` | **Open Notebook RAG connector** (opt-in, egress-gated, non-throwing, tolerates 4 response shapes) | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/open-notebook.js` |
+| `examples/product-research/` | **Autoresearch primitives** (8 ops: normalizeConfig, renderProgram, decide, TSV I/O) — *the most meta example* | 100.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/product-research.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -434,6 +439,109 @@ rollup, year-aware validators.
 
 ```bash
 cd examples/vat-ru
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/settings-store/` — AI settings store
+
+Faithful Python port of `settings-store.js` from
+[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core).
+Local file-backed AI settings (local-first): the single OpenRouter API key,
+the per-aspect model policy, and the opt-in Open Notebook connector. Stored
+as JSON with 0600 perms in a product-provided data dir. **5 ops:**
+`getSettings`, `updateSettings`, `redactedForClient` (hides secrets for
+browser), `resolveModelPolicy` (stored → env default → auto), `defaults`.
+The eval creates a fresh tmp dataDir per test case. Each test case is a
+**sequence of operations** against a shared dataDir so setup + assertion
+are in one self-contained call. **Baseline 100.00** on first run (after a
+75→100 fix where the gen script did per-test setup but the eval didn't).
+Agent's job: `validateSettings`, `migrateSettings`, `rotateApiKey`,
+audit log, encryption at rest.
+
+```bash
+cd examples/settings-store
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/model-catalog/` — OpenRouter model catalog
+
+Faithful Python port of `model-catalog.js` from
+[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core). Live
+OpenRouter `/models` catalog with injected `safeFetch` + `isEgressAllowed`.
+Framework-agnostic. `list_models()` returns `{online, source, reason?, models}`
+and **NEVER throws** — degrades to bundled `FALLBACK_MODELS` (5 entries: Claude
+3.5 Sonnet, GPT-4o, GPT-4o mini, Gemini Flash 1.5, Llama 3.1 70B). 10 cases
+× 7 fields cover egress-blocked, HTTP 200 live, HTTP 500, empty list,
+fetch-error, with/without apiKey, custom referer/title, invalid payload,
+missing-id model filter. **Baseline 100.00** on first run. Agent's job:
+caching with TTL, `filterByContext`, `filterByModality`, `searchModels`.
+
+```bash
+cd examples/model-catalog
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/supplemental-sources/` — Advisory source policy
+
+Faithful Python port of `supplemental.js` from
+[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core). Advisory-only
+"supplemental sources" policy — e.g. Open Notebook hits shown BESIDE a
+product's authoritative citations. Pure (no I/O). Smallest example in the
+suite (44 lines JS, ~80 lines Python). Cap (3) / dedupe key (sourceUrl‖title) /
+ordering (score desc) / excerpt length (280). **Supplemental sources are
+ADVISORY** — never satisfy a required citation gate. **Baseline 100.00** on
+first run. Agent's job: sentence-boundary snippet, custom `origin_tag`,
+`groupedByOrigin` rollup, PII redaction.
+
+```bash
+cd examples/supplemental-sources
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/open-notebook/` — Open Notebook RAG connector
+
+Faithful Python port of `open-notebook.js` from
+[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core). Connector
+for lfnovo/open-notebook — opt-in AI source that sits BESIDE a product's
+local RAG. **3 ops:** `isEnabled`, `normalizeResults` (tolerates 4 response
+shapes: `{results}|{sources}|{data}|array`), `createOpenNotebook` +
+`search`. Framework-agnostic: egress-gated `safeFetch` is INJECTED. The
+connector is opt-in (only runs when `settings.openNotebook.enabled +
+baseUrl` are set), egress-gated, and non-throwing (any failure returns
+`[]`). 16 cases × 11 fields cover all 4 normalize shapes, no-text filter,
+k-cap, disabled/empty/HTTP200/HTTP500/throws/apiKey/custom searchPath.
+**Baseline 100.00** on first run. Agent's job: `summary` field, caching,
+`mergeWithLocalRAG`, `searchWithRetry`, `groupByNotebook`.
+
+```bash
+cd examples/open-notebook
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/product-research/` — Autoresearch primitives
+
+**The most meta example** — these are the primitives autoresearch itself
+uses. Faithful Python port of `product-research.js` from
+[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core). Pure
+helpers (no I/O, no shells, no model calls) for rendering the agent
+program, comparing fixed-budget eval results, and recording experiment
+rows in a stable TSV format. **8 ops:** `normalizeConfig`,
+`renderProgram`, `decide` (keep / discard / crash based on metric delta +
+complexity delta), `metricDelta`, `extractMetricFromText`, `formatHeader`,
+`formatResult`, `parseTsv`. **Baseline 100.00** after a 75→100 fix
+(float precision in JS math: 0.6 − 0.5 = 0.0999…; fixed eval to use
+approximate float comparison + recursive `_eq` for nested dicts). Agent's
+job: `validateConfig` (return errors instead of raising),
+`experimentSummary` rollup, `progressVsBudget`, `detectRegression`,
+`renderProgramAsYaml`.
+
+```bash
+cd examples/product-research
 python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
