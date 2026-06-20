@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T21:25:00Z	baseline	keep	100.0000	0.00	baseline: faithful Python port of armeniaPhone.js from A1-Localization-AM. 4 functions (normalize_nsn, is_valid_armenian_phone, e164, format_phone). 20 cases cover all 6 input shapes (E.164, 00-prefix, domestic 0-prefix, bare, with spaces, with punctuation) + 10 invalid shapes (wrong length, starts with 0, non-numeric, empty, null, country-code only). 100% on first run.

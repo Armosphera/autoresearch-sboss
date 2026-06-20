@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T21:28:00Z	baseline	keep	100.0000	0.00	baseline: faithful Python port of armeniaRegions.js from A1-Localization-AM. 11 administrative divisions (10 marzes + Yerevan), keyed on ISO 3166-2:AM codes. 4 functions (regionByCode, isValidRegionCode, findRegion, citiesForRegion). 20 cases cover all valid query shapes (code, name, case-insensitive, whitespace) + invalid (unknown code, empty, non-region names). 100% on first run.
