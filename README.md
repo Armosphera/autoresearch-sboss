@@ -106,6 +106,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | Example | What | Baseline | Source of truth |
 |---|---|---|---|
 | `examples/hhvh/` | **ՀՎՀՀ (Armenian taxpayer id) validation** | 96.67 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/localization.js` |
+| `examples/ru-identifiers/` | **5 Russian business id validators (ИНН / КПП / ОГРН / ОГРНИП / СНИЛС)** | 85.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/inn.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -117,6 +118,21 @@ check-digit algorithm (currently a TODO seam in the JS).
 ```bash
 cd examples/hhvh
 python3 eval.py             # baseline: 96.67
+# then point an agent at program.md
+```
+
+### `examples/ru-identifiers/` — Russian business id validator suite
+
+A unified Python validator that dispatches to 5 separate JS-ported validators: ИНН
+(legal/individual, weighted mod 11), КПП (regex), ОГРН (Horner mod 11), ОГРНИП
+(Horner mod 13), СНИЛС (weighted mod 101). Baseline 85.00 reflects the JS reference's
+incomplete separator handling — only СНИЛС strips whitespace and hyphens; the dispatcher
+and the other 4 validators don't. The agent's first move: add separator stripping in the
+dispatcher to hit 100, then improve error messages and edge cases.
+
+```bash
+cd examples/ru-identifiers
+python3 eval.py             # baseline: 85.00
 # then point an agent at program.md
 ```
 
