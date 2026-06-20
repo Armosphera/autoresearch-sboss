@@ -98,6 +98,130 @@ The harness doesn't care what workflow you're tuning. It only cares about:
 
 Swap any of those and the loop keeps working.
 
+## Examples
+
+The `examples/` directory contains self-contained real-SBOSS workflow targets. Each one
+follows the same 3-file pattern and can be iterated on independently.
+
+| Example | What | Baseline | Source of truth |
+|---|---|---|---|
+| `examples/hhvh/` | **ՀՎՀՀ (Armenian taxpayer id) validation** | 96.67 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/localization.js` |
+| `examples/ru-identifiers/` | **5 Russian business id validators (ИНН / КПП / ОГРН / ОГРНИП / СНИЛС)** | 85.00 / 100 | [Armosphera/A1-Localization-RU](https://github.com/Armosphera/A1-Localization-RU) `src/inn.js` |
+| `examples/model-policy/` | **A1 model policy resolver** (per-module / per-aspect precedence) | 50.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/model-policy.js` |
+| `examples/vat-return/` | **Armenian VAT return computation** (output − input = payable to SRC) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
+| `examples/payroll-am/` | **Armenian payroll rules engine** (4 employee withholdings → net) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPayroll.js` |
+| `examples/chart-of-accounts-am/` | **Armenian chart of accounts** (623 accounts, 9 classes) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaChartOfAccounts.js` |
+| `examples/vat-return-form/` | **VAT return form validator** (10 error codes, cross-foot checks) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
+
+### `examples/hhvh/` — Armenian taxpayer id validation
+
+A faithful Python port of `validateHvhh()` from A1-Localization-AM, plus a known-weakness
+eval set that flags the JS reference's missing pre-normalization length check. The agent's
+job: fix the bug to hit 100, then research and implement the official Armenian HHVH
+check-digit algorithm (currently a TODO seam in the JS).
+
+```bash
+cd examples/hhvh
+python3 eval.py             # baseline: 96.67
+# then point an agent at program.md
+```
+
+### `examples/ru-identifiers/` — Russian business id validator suite
+
+A unified Python validator that dispatches to 5 separate JS-ported validators: ИНН
+(legal/individual, weighted mod 11), КПП (regex), ОГРН (Horner mod 11), ОГРНИП
+(Horner mod 13), СНИЛС (weighted mod 101). Baseline 85.00 reflects the JS reference's
+incomplete separator handling — only СНИЛС strips whitespace and hyphens; the dispatcher
+and the other 4 validators don't. The agent's first move: add separator stripping in the
+dispatcher to hit 100, then improve error messages and edge cases.
+
+```bash
+cd examples/ru-identifiers
+python3 eval.py             # baseline: 85.00
+# then point an agent at program.md
+```
+
+### `examples/model-policy/` — A1 model policy resolver
+
+A faithful Python port of `resolveModelForRequest()` from `@a1/ai`, the SBOSS AI provider
+core. The JS returns only the resolved model id — this baseline adds a `source` field
+("module" / "aspect" / "default" / "auto") as the agent's first lever. Baseline 50.00 =
+resolved_model matches JS everywhere (100%) + source missing everywhere (0%). After fixing
+source → 100, the agent can add cost-aware or LLM-based routing using OpenRouter pricing
+data from the fallback catalog.
+
+```bash
+cd examples/model-policy
+python3 eval.py             # baseline: 50.00
+# then point an agent at program.md
+```
+
+### `examples/vat-return/` — Armenian VAT return computation
+
+A faithful Python port of `computeVatReturn()` from A1-Localization-AM. Implements
+Armenia's VAT logic per decree N 298-Ն: output VAT (20% standard, 16.67% imputed, 0%
+zero-rated) minus recoverable input VAT = net. Positive net is payable to SRC; negative
+net is credit carried forward. **Baseline 100.00** — the JS is mathematically clean for
+valid inputs, no bugs to fix. The agent's job: make it STRICTLY MORE USEFUL by adding
+input-validation warnings (negative amounts, implausible rates, vatAmount/rate mismatch),
+an audit trail (per-line classification), multi-period aggregation, and the second
+`vatReturnForm()` function that maps onto official SRC form lines 7/9/12/13/16/17/18/21/23.
+
+```bash
+cd examples/vat-return
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/payroll-am/` — Armenian payroll rules engine
+
+A faithful Python port of `computePayroll()` from A1-Localization-AM. Computes
+gross → net under 2026 Armenian rules: 4 employee withholdings — income tax (flat 20%),
+pension (tiered 5%/10%−25k, capped 87,500), stamp duty (flat 1,000/mo — 2026 revision
+replaced the previous 1,500/3,000/5,500/8,500 tiers), and health insurance (banded
+0 / 4,800 / 10,800 by Dec-2025 law). **Baseline 100.00** — no bugs to fix. Agent's job:
+add warnings for negative / unrealistic gross, effective tax rate, annual projection,
+employer-side social contributions (5% up to cap).
+
+```bash
+cd examples/payroll-am
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/chart-of-accounts-am/` — Armenian chart of accounts
+
+A faithful Python port of `accountByCode` / `accountClass` / `normalBalance` from
+A1-Localization-AM, backed by the full official RA chart (623 accounts across 9 classes
+per Ministry of Finance order arlis.am/hy/acts/75961). Loads from `data.json` (3739 lines).
+Adds a `validate_code()` wrapper that returns structured `{ok, normalized, error, account}`
+— the JS silently returns `None` for malformed/unknown codes, the Python implementation
+tells you WHY. **Baseline 100.00.** Agent's job: search by Armenian name, parent-class
+navigation, sub-accounts list, deprecated flags.
+
+```bash
+cd examples/chart-of-accounts-am
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/vat-return-form/` — VAT return form validator
+
+The sister function of `computeVatReturn()` in the same file. Validates an assembled VAT
+return form against SRC decree N 298-Ն — catches 10 distinct error codes:
+`FORM_MISSING_LINE`, `FORM_NON_NUMERIC_AMOUNT`, `FORM_NON_INTEGER_AMOUNT`,
+`FORM_NEGATIVE_AMOUNT`, `FORM_16_BASE_MISMATCH` / `FORM_16_VAT_MISMATCH` (cross-foot),
+`FORM_21_VAT_MISMATCH`, `FORM_23_NET_MISMATCH`, `FORM_7_RATE_MISMATCH` /
+`FORM_9_RATE_MISMATCH` (plausibility bands). **Baseline 100.00.** Agent's job: add
+`severity` field per finding (error/warning/info), `summary` field for UI toasts,
+stricter checks (zero-amount lines that imply no transactions).
+
+```bash
+cd examples/vat-return-form
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
 ## Related
 
 - [karpathy/autoresearch](https://github.com/karpathy/autoresearch) — the original

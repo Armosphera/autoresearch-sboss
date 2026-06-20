@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T17:59:30Z	baseline	keep	96.6667	0.00	baseline: faithful Python port of validateHvhh() from A1-Localization-AM@src/localization.js. Fails case #12 ("00123-456" — pre-normalization length check not in JS reference)

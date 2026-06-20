@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T18:18:30Z	baseline	keep	85.0000	0.00	baseline: faithful Python port of src/inn.js (5 Russian id validators + dispatcher). Fails 3 cases: #7 SNILS-with-sep, #18 INN-with-hyphen, #19 OGRN-with-hyphen. JS reference strips separators only inside _validate_snils; dispatcher + other validators do not.

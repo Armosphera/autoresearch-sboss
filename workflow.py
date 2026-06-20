@@ -117,8 +117,8 @@ _RE_DATE_RU_MONTH = re.compile(
 _RE_AMOUNT = re.compile(r"(?:total|amount|sum|итого|всего)\s*[:\-]?\s*([0-9][0-9,\.\s]*)", re.IGNORECASE)
 _RE_AMOUNT_BARE = re.compile(r"\$\s*([0-9][0-9,\.]*)|([0-9][0-9,\.]*)\s*\$")
 _RE_AMOUNT_RUB = re.compile(r"([0-9][0-9,\.\s]*)\s*(?:руб|RUB|р\.)", re.IGNORECASE)
-_RE_AMOUNT_AMD = re.compile(r"([0-9][0-9,\.\s]*)\s*(?:драм|AMD|֏)", re.IGNORECASE)
-_RE_CURRENCY = re.compile(r"\b(USD|EUR|RUB|AMD|GBP|JPY|CNY|драм|руб)\b", re.IGNORECASE)
+_RE_AMOUNT_AMD = re.compile(r"([0-9][0-9,\.\s]*)\s*(?:драм|դրամ|AMD|֏)", re.IGNORECASE)
+_RE_CURRENCY = re.compile(r"\b(USD|EUR|RUB|AMD|GBP|JPY|CNY|драм|դրամ|руб|р\.)\b|[$€£¥֏]", re.IGNORECASE)
 _RE_TAX_ID = re.compile(
     r"(?:federal\s+tax\s+id|tax\s*id|vat\s*id|vat|ein|inn|hhvh|հվհհ|инн(?:/кпп)?)\s*[:\-]?\s*([A-ZА-Я0-9\-]{4,})",
     re.IGNORECASE,
@@ -158,26 +158,75 @@ _AMOUNT_LINE_KEYWORDS = (
     "итого к оплате", "к оплате", "сумма:", "ընդամենը",
 )
 _AMOUNT_LINE_EXCLUDE = ("subtotal", "tax (", "vat", "ндс", "ներառյալ", "unit price")
-_NUMBER_TOKEN = re.compile(r"(?:[$֏]\s*)?\d[\d,\.\s]*(?:\s*(?:USD|EUR|RUB|AMD|руб|драм))?", re.IGNORECASE)
+_NUMBER_TOKEN = re.compile(
+    r"(?:(?:USD|EUR|RUB|AMD|GBP|JPY|CNY|руб|р\.|драм|դրամ|[$€£¥֏])\s*)?"
+    r"\d[\d,\.\s]*"
+    r"(?:\s*(?:USD|EUR|RUB|AMD|GBP|JPY|CNY|руб|р\.|драм|դրամ|[$€£¥֏]))?",
+    re.IGNORECASE,
+)
 _VENDOR_SKIP_PREFIXES = (
     "bill to", "ship to", "sold to", "invoice", "statement", "remit to", "payable to",
     "счёт", "счет", "покупатель", "получатель",
     "ապառիկ", "հաշիվ", "գնորդ",
 )
-_VENDOR_CUE = re.compile(r"\b(?:vendor|seller|supplier|from|issued by|payable to)\s*[:\-]\s*(.+)$", re.IGNORECASE)
+_VENDOR_CUE = re.compile(r"\b(?:vendor|seller|supplier|from|issued by)\s*[:\-]\s*(.+)$", re.IGNORECASE)
 _COMPANY_HINT = re.compile(
     r"(LLC|Ltd\.?|Inc\.?|Corp\.?|Corporation|Industries|Enterprises|Software|Systems|Science|Research|"
     r"ООО|ЗАО|ИП|ԱՁ|ՓԲԸ|ԲԸ)",
     re.IGNORECASE,
 )
+_CURRENCY_ALIASES = {
+    "$": "USD",
+    "€": "EUR",
+    "£": "GBP",
+    "¥": "JPY",
+    "֏": "AMD",
+    "usd": "USD",
+    "eur": "EUR",
+    "rub": "RUB",
+    "amd": "AMD",
+    "gbp": "GBP",
+    "jpy": "JPY",
+    "cny": "CNY",
+    "руб": "RUB",
+    "р.": "RUB",
+    "драм": "AMD",
+    "դրամ": "AMD",
+}
 
 
 def _iso(year: str | int, month: str | int, day: str | int) -> str:
     return f"{int(year):04d}-{int(month):02d}-{int(day):02d}"
 
 
+def _prefers_day_first_dates(document: str) -> bool:
+    lower = document.lower()
+    if re.search(r"[А-Яа-яԱ-Ֆա-ֆ]", document):
+        return True
+    if any(cue in document for cue in ("€", "£", "֏")):
+        return True
+    if re.search(r"\b(EUR|RUB|AMD|GBP|VAT)\b|vat\s*id", document, re.IGNORECASE):
+        return True
+    if re.search(r"\b(USD|EIN|federal\s+tax\s+id)\b|\$", document, re.IGNORECASE):
+        return False
+    return "issued:" in lower or "issue date:" in lower
+
+
+def _currency_from_text(text: str) -> str | None:
+    lower = text.lower()
+    for alias, code in _CURRENCY_ALIASES.items():
+        if alias in ("$", "€", "£", "¥", "֏"):
+            if alias in text:
+                return code
+        elif alias.isascii() and alias.replace(".", "").isalnum() and re.search(rf"\b{re.escape(alias)}\b", lower):
+            return code
+        elif (not alias.isascii() or not alias.replace(".", "").isalnum()) and alias in lower:
+            return code
+    return None
+
+
 def _parse_amount_token(token: str) -> float | None:
-    cleaned = re.sub(r"(?:USD|EUR|RUB|AMD|руб|драм|[$֏])", "", token, flags=re.IGNORECASE).strip()
+    cleaned = re.sub(r"(?:USD|EUR|RUB|AMD|GBP|JPY|CNY|руб|р\.|драм|դրամ|[$€£¥֏])", "", token, flags=re.IGNORECASE).strip()
     cleaned = cleaned.replace("\u00a0", " ").replace(" ", "")
     if not cleaned:
         return None
@@ -195,8 +244,8 @@ def _parse_amount_token(token: str) -> float | None:
         return None
 
 
-def _extract_amount(document: str) -> float | None:
-    candidates: list[float] = []
+def _extract_amount_and_currency(document: str) -> tuple[float | None, str | None]:
+    candidates: list[tuple[float, str | None]] = []
     for raw_line in document.splitlines():
         line = raw_line.strip()
         lower = line.lower()
@@ -205,22 +254,25 @@ def _extract_amount(document: str) -> float | None:
         if any(keyword in lower for keyword in _AMOUNT_LINE_EXCLUDE):
             continue
         line_values = [
-            value for value in (_parse_amount_token(match.group(0)) for match in _NUMBER_TOKEN.finditer(line))
-            if value is not None
+            (value, _currency_from_text(match.group(0)) or _currency_from_text(line))
+            for match in _NUMBER_TOKEN.finditer(line)
+            if (value := _parse_amount_token(match.group(0))) is not None
         ]
         if line_values:
             candidates.append(line_values[-1])
     if candidates:
         return candidates[-1]
 
-    fallback: list[float] = []
+    fallback: list[tuple[float, str | None]] = []
     for regex in (_RE_AMOUNT_RUB, _RE_AMOUNT_AMD, _RE_AMOUNT_BARE, _RE_AMOUNT):
         for match in regex.finditer(document):
             token = next((group for group in match.groups() if group), "")
-            value = _parse_amount_token(token)
+            value = _parse_amount_token(match.group(0))
+            if value is None and token:
+                value = _parse_amount_token(token)
             if value is not None:
-                fallback.append(value)
-    return fallback[-1] if fallback else None
+                fallback.append((value, _currency_from_text(match.group(0)) or _currency_from_text(token)))
+    return fallback[-1] if fallback else (None, None)
 
 
 def _extract_vendor(document: str) -> str | None:
@@ -265,7 +317,14 @@ def _run_with_mock(document: str) -> dict[str, Any]:
             if len(yy) == 2:
                 yy = "20" + yy
             a, b = int(m.group(1)), int(m.group(2))
-            month, day = (b, a) if a > 12 else (a, b)
+            if a > 12:
+                day, month = a, b
+            elif b > 12:
+                month, day = a, b
+            elif _prefers_day_first_dates(document):
+                day, month = a, b
+            else:
+                month, day = a, b
             out["invoice_date"] = _iso(yy, month, day)
         else:
             m = _RE_DATE_DOT_EU.search(document)
@@ -283,18 +342,10 @@ def _run_with_mock(document: str) -> dict[str, Any]:
                     if m:
                         out["invoice_date"] = _iso(m.group(3), _RU_MONTHS[m.group(2).lower()], m.group(1))
 
-    # Currency + amount (try labeled first, then currency-symbol based).
-    cur = _RE_CURRENCY.search(document)
-    if cur:
-        c = cur.group(1).lower()
-        c_map = {"драм": "AMD", "руб": "RUB"}
-        out["currency"] = c_map.get(c, c.upper())
-    elif "$" in document:
-        out["currency"] = "USD"
-    elif "֏" in document or "դրամ" in document.lower():
-        out["currency"] = "AMD"
-
-    out["total_amount"] = _extract_amount(document)
+    # Prefer the currency attached to the selected total, then use document-level cues.
+    amount, currency = _extract_amount_and_currency(document)
+    out["total_amount"] = amount
+    out["currency"] = currency or _currency_from_text(document)
 
     m = _RE_TAX_ID.search(document)
     if m:

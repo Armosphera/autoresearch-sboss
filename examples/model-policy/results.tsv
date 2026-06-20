@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T18:30:00Z	baseline	keep	50.0000	0.00	baseline: faithful Python port of resolveModelForRequest() from @a1/ai model-policy.js. resolved_model=100% (matches JS), source=0% (JS doesn't return it; agent's first lever).
