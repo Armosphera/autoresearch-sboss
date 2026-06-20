@@ -113,6 +113,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/chart-of-accounts-am/` | **Armenian chart of accounts** (623 accounts, 9 classes) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaChartOfAccounts.js` |
 | `examples/vat-return-form/` | **VAT return form validator** (10 error codes, cross-foot checks) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
 | `examples/phone-am/` | **Armenian phone normalization** (+374, 00374, 091234567, etc.) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPhone.js` |
+| `examples/regions-am/` | **Armenian administrative regions** (11 marzes, ISO 3166-2:AM) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaRegions.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -236,6 +237,22 @@ via `armeniaRegions.js` lookup.
 
 ```bash
 cd examples/phone-am
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/regions-am/` — Armenian administrative regions
+
+A faithful Python port of `armeniaRegions.js` — 11 administrative divisions (10
+provinces + Yerevan capital), keyed on official ISO 3166-2:AM codes (AM-ER through
+AM-VD). 4 functions: `regionByCode`, `isValidRegionCode`, `findRegion` (matches by
+code OR Armenian name OR English name, case-insensitive), `citiesForRegion`. Used
+across A1 Suite for addresses, e-invoices, shipping. **Baseline 100.00** on first
+run. Agent's job: add `find_region_by_city` (reverse lookup), fuzzy name matching
+(transliteration variants), distance-to-Yerevan, adjacency lookup.
+
+```bash
+cd examples/regions-am
 python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
