@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-20T22:50:00Z	baseline	keep	100.0000	0.00	baseline: faithful Python port of chartOfAccounts.js from A1-Localization-RU. 73 accounts in 9 sections (8 balance-sheet I-VIII + offBalance) per Приказ Минфина РФ № 94н. 19 cases x 6 fields (found, code, ru, section, nature, normalBalance). Data in data.json (73 accounts) + sections.json (9 sections). Section by number RANGE (not leading digit) — different from AM chart.
