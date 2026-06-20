@@ -114,6 +114,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/vat-return-form/` | **VAT return form validator** (10 error codes, cross-foot checks) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
 | `examples/phone-am/` | **Armenian phone normalization** (+374, 00374, 091234567, etc.) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPhone.js` |
 | `examples/regions-am/` | **Armenian administrative regions** (11 marzes, ISO 3166-2:AM) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaRegions.js` |
+| `examples/einvoice-am/` | **Armenian e-invoice validator** (16 error codes, pre-SRC submission compliance gate) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/einvoice.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -253,6 +254,27 @@ run. Agent's job: add `find_region_by_city` (reverse lookup), fuzzy name matchin
 
 ```bash
 cd examples/regions-am
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/einvoice-am/` — Armenian e-invoice validator
+
+Structural compliance gate for an e-invoice before mapping to the official SRC XSD
+and submission. Port of `validateEInvoice()` from
+[Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM)
+`src/einvoice.js`. The most error-code-rich target in the suite (16 distinct codes
+covering transaction type, dates, supplier/buyer identification, line items, and
+amount/rate consistency). Validates HHVH on both supplier and buyer, requires
+either HHVH or passport for buyer, supports excise + environmental-fee lines,
+recognises 0% and 20% VAT rates for issued invoices. **Baseline 100.00** on first
+run after a one-line test-data fix (an all-same-digit HHVH was getting rejected by
+the new `isValidHvhh()` check). Agent's job: add per-finding `severity` (error /
+warning / info), add `summary` line, add `strict` mode, add cross-line consistency
+checks.
+
+```bash
+cd examples/einvoice-am
 python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
