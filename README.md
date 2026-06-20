@@ -110,6 +110,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/model-policy/` | **A1 model policy resolver** (per-module / per-aspect precedence) | 50.00 / 100 | [samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core) `src/model-policy.js` |
 | `examples/vat-return/` | **Armenian VAT return computation** (output − input = payable to SRC) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/vatReturn.js` |
 | `examples/payroll-am/` | **Armenian payroll rules engine** (4 employee withholdings → net) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaPayroll.js` |
+| `examples/chart-of-accounts-am/` | **Armenian chart of accounts** (623 accounts, 9 classes) | 100.00 / 100 | [Armosphera/A1-Localization-AM](https://github.com/Armosphera/A1-Localization-AM) `src/armeniaChartOfAccounts.js` |
 
 ### `examples/hhvh/` — Armenian taxpayer id validation
 
@@ -183,6 +184,22 @@ employer-side social contributions (5% up to cap).
 
 ```bash
 cd examples/payroll-am
+python3 eval.py             # baseline: 100.00
+# then point an agent at program.md
+```
+
+### `examples/chart-of-accounts-am/` — Armenian chart of accounts
+
+A faithful Python port of `accountByCode` / `accountClass` / `normalBalance` from
+A1-Localization-AM, backed by the full official RA chart (623 accounts across 9 classes
+per Ministry of Finance order arlis.am/hy/acts/75961). Loads from `data.json` (3739 lines).
+Adds a `validate_code()` wrapper that returns structured `{ok, normalized, error, account}`
+— the JS silently returns `None` for malformed/unknown codes, the Python implementation
+tells you WHY. **Baseline 100.00.** Agent's job: search by Armenian name, parent-class
+navigation, sub-accounts list, deprecated flags.
+
+```bash
+cd examples/chart-of-accounts-am
 python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
