@@ -100,3 +100,103 @@ jobs:
 
       - name: ruff format --check
         run: uv run ruff format --check . || echo "(ruff format not configured — skipped)"
+
+  sub-examples-eval:
+    # Regression gate: every sub-example under examples/* must pass its own
+    # eval.py at score >= 100.00. A failure means a change to a shared lib
+    # (e.g. _port.py) or an example's workflow.py broke the contract.
+    # Each example is run independently so a single failure doesn't mask others.
+    #
+    # Skipped: examples that don't have an eval.py, plus the cross-link-sweep
+    # meta-task (uses GitHub Contents API + prints "score: N / M" instead of
+    # "score: N.MMMM" — not a regression test).
+    name: sub-example evals (examples/*)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          python-version: '3.11'
+
+      - name: Run every example's eval.py and assert score=100
+        run: |
+          set -euo pipefail
+          fail_count=0
+          pass_count=0
+          skip_count=0
+          declare -a results
+          # Run each example in sorted order so the log is deterministic.
+          for example_dir in examples/*/; do
+            name=$(basename "$example_dir")
+            # Skip directories without an eval.py (shouldn't happen, but defensive).
+            if [ ! -f "$example_dir/eval.py" ]; then
+              echo "SKIP  $name (no eval.py)"
+              skip_count=$((skip_count + 1))
+              continue
+            fi
+            # Skip the cross-link-sweep meta-task: it uses the GitHub Contents
+            # API (needs a token, which CI doesn't have) and prints score in
+            # "N / M" format, not a percentage.
+            if [ "$name" = "cross-link-sweep" ]; then
+              echo "SKIP  $name (meta-task, uses GitHub API, run manually)"
+              skip_count=$((skip_count + 1))
+              continue
+            fi
+            # Run the eval. capture stdout, parse the score line.
+            set +e
+            output=$(cd "$example_dir" && python3 eval.py 2>&1)
+            exit_code=$?
+            set -e
+            score_line=$(echo "$output" | grep -E '^score:' | tail -1)
+            if [ "$exit_code" -ne 0 ] || [ -z "$score_line" ]; then
+              echo "FAIL  $name (exit=$exit_code, no score)"
+              echo "$output" | tail -5 | sed 's/^/      /'
+              fail_count=$((fail_count + 1))
+              results+=("FAIL  $name")
+              continue
+            fi
+            # Two score formats in use:
+            #   1) "score: 100.0000 | elapsed: 0.5s"  (most examples)
+            #   2) "score: 22 / 22 | elapsed: 8.27s"   (cross-link-sweep only)
+            # Handle both.
+            score_token=$(echo "$score_line" | awk '{print $2}')
+            if echo "$score_line" | grep -qE '^score: [0-9]+ / [0-9]+'; then
+              num=$(echo "$score_token" | cut -d/ -f1)
+              den=$(echo "$score_token" | cut -d/ -f2)
+              if [ "$num" = "$den" ] && [ "$num" -gt 0 ]; then
+                echo "PASS  $name  score=$num/$den"
+                pass_count=$((pass_count + 1))
+                results+=("PASS  $name")
+              else
+                echo "FAIL  $name  score=$num/$den (expected $den/$den)"
+                fail_count=$((fail_count + 1))
+                results+=("FAIL  $name")
+              fi
+            else
+              is_100=$(python3 -c "import sys; s=float('$score_token'); print('yes' if s >= 99.999 else 'no')")
+              if [ "$is_100" = "yes" ]; then
+                echo "PASS  $name  score=$score_token"
+                pass_count=$((pass_count + 1))
+                results+=("PASS  $name")
+              else
+                echo "FAIL  $name  score=$score_token (expected 100.00)"
+                fail_count=$((fail_count + 1))
+                results+=("FAIL  $name")
+              fi
+            fi
+          done
+          echo ""
+          echo "================================================"
+          echo "Sub-example eval summary: $pass_count pass, $fail_count fail, $skip_count skip"
+          echo "================================================"
+          printf '%s\n' "${results[@]}"
+          if [ "$fail_count" -gt 0 ]; then
+            echo ""
+            echo "::error:: $fail_count sub-example(s) regressed below 100.00"
+            exit 1
+          fi
+        env:
+          EXPERIMENT_BUDGET_SEC: '15'
