@@ -606,7 +606,9 @@ python3 eval.py             # baseline: 100.00
 - [karpathy/autoresearch](https://github.com/karpathy/autoresearch) — the original
 - [miolini/autoresearch-macos](https://github.com/miolini/autoresearch-macos) — PyTorch + MPS fork
 - [trevin-creator/autoresearch-mlx](https://github.com/trevin-creator/autoresearch-mlx) — Apple MLX fork
-- [A1-Suite](https://github.com/Armosphera/A1-Platform) — the SBOSS product this is built for
+- [Armosphera/A1-Validator](https://github.com/Armosphera/A1-Validator) — Python port of the 37 business-ID validators; vendors from this repo's `examples/*/`
+- [Armosphera/SBOS-A1-ERP](https://github.com/Armosphera/SBOS-A1-ERP) — the sovereign business-ops ERP built on top of these validators
+- [A1-Platform](https://github.com/Armosphera/A1-Platform) — the SBOSS product this is built for
 
 ## License
 
