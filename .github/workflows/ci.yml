@@ -57,10 +57,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci || npm install
+      - name: Install dependencies (no lockfile present, npm install is correct)
+        run: npm install --no-audit --no-fund
 
       - name: List available eval lanes
         run: npm run karpathy:list
