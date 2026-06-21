@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-21T10:20:35Z	iter1	keep	100.0000	0.00	implement mod-89 check-digit verifier (ATO spec: subtract 1 from first digit, weights [10,1,3,5,7,9,11,13,15,17,19], mod 89)

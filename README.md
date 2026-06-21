@@ -149,6 +149,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/us-ein/` | **US EIN (Employer Identification Number)** (XX-XXXXXXX, 9 digits, IRS campus code prefix) | 100.00 / 100 | [irs.gov/ein](https://www.irs.gov/businesses/small-businesses-self-employed/how-eins-work) |
 | `examples/gstin/` | **India GSTIN** (15 alphanumeric, state code + PAN-style middle, default Z + check) | 100.00 / 100 | [gst.gov.in](https://www.gst.gov.in/) |
 | `examples/swiss-uid/` | **Swiss UID (Unternehmens-Identifikationsnummer)** (CHE/CH/CDF + 9 digits) | 100.00 / 100 | [uid.admin.ch](https://www.uid.admin.ch/) |
+| `examples/au-abn/` | **AU ABN (Australian Business Number)** (XX XXX XXX XXX, 11 digits, mod-89 check per ATO spec) | 100.00 / 100 | [abr.business.gov.au](https://abr.business.gov.au/) |
 | `examples/open-notebook/` | **Open Notebook RAG connector** (opt-in, egress-gated, non-throwing, tolerates 4 response shapes) | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/open-notebook.js` |
 | `examples/product-research/` | **Autoresearch primitives** (8 ops: normalizeConfig, renderProgram, decide, TSV I/O) — *the most meta example* | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/product-research.js` |
 
