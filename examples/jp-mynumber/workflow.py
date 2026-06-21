@@ -1,0 +1,122 @@
+"""
+workflow.py — Japan My Number (個人番号 / マイナンバー) validation.
+
+This file is the agent's lever. The default implementation is intentionally WEAK — it only
+does basic structural validation (12 digits, separator stripping). The agent's job:
+implement the proper mod-11 check-digit algorithm (currently a documented TODO seam).
+
+Source of truth: https://www.soumu.go.jp/ (Ministry of Internal Affairs and Communications).
+The My Number format and check algorithm are public.
+
+Reference format:
+- 12 digits
+- Formatted as "XXXXXX XXXXXX" (6+6 with space) or "XXXXXXXXXXXX" (no separators)
+- First 6 digits: area code (based on address at registration)
+- Last 6 digits: serial + check digit
+
+Check algorithm (mod 11):
+- Apply weights [6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2, 1] to the 12 digits
+- Sum
+- If sum mod 11 <= 1, check digit is 0; else check = 11 - (sum mod 11)
+- The 12th digit should match the check digit
+
+Real test cases (synthetic, do not use real numbers):
+- 123456789014 (valid: weighted sum=216, mod 11=7, check=4 → matches last digit 4)
+- 123456789018 (invalid: weighted sum=220, mod 11=0, check=0 → doesn't match last digit 8)
+
+Special cases:
+- "000000000000" (all zeros) → invalid (reserved)
+- "111111111111" (all same) → invalid (reserved pattern)
+- Leading 0 → invalid (reserved per the algorithm: the first digit is always non-zero)
+
+The agent's job is to:
+1. Implement the mod-11 check-digit verifier (currently a TODO stub that returns True)
+2. Handle separator normalization (My Numbers are commonly written as "123456789018"
+   or "123456 789 018")
+3. Catch special invalid cases (all-zeros, all-same)
+4. Return { ok, normalized, error } matching the eval_set contract
+"""
+
+from __future__ import annotations
+
+import re
+from typing import Any
+
+MYNUMBER_LENGTH = 12
+_SEPARATOR_RE = re.compile(r"[\s\-]")
+_ALL_DIGITS_RE = re.compile(r"^[0-9]+$")
+_ALL_SAME_RE = re.compile(r"^(\d)\1{11}$")  # 12 of the same digit
+
+# Weights for the mod-11 check (per My Number spec)
+_MYNUMBER_WEIGHTS = (6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2, 1)
+
+
+def normalize_mynumber(value: Any) -> str:
+    """Strip whitespace + hyphens. Returns "" for null/None.
+
+    Examples:
+      '123456 789 014'  -> '123456789014'
+      '123-456-789-014' -> '123456789014'
+      '123456789014'    -> '123456789014'
+    """
+    if value is None:
+        return ""
+    return _SEPARATOR_RE.sub("", str(value))
+
+
+def _default_check_digit(mynumber: str) -> bool:
+    """Default check-digit verifier — accepts any 12-digit string.
+
+    Replaced with the My Number mod-11 algorithm. Apply weights
+    [6, 5, 4, 3, 2, 7, 6, 5, 4, 3, 2, 1] to the 12 digits, sum,
+    mod 11. If sum mod 11 <= 1, check is 0; else check = 11 - (sum mod 11).
+    The 12th digit should match the check.
+    """
+    digits = [int(c) for c in mynumber]
+    s = sum(d * w for d, w in zip(digits, _MYNUMBER_WEIGHTS))
+    check = 0 if s % 11 <= 1 else 11 - (s % 11)
+    return check == digits[11]
+
+
+
+def validate_mynumber(value: Any, *, check_digit_verifier=None) -> dict[str, Any]:
+    """Validate a Japan My Number. Returns { ok, normalized, error }.
+
+    Args:
+        value: raw input (string, None, or anything str()-coercible).
+        check_digit_verifier: optional callable (str) -> bool. If supplied and returns False,
+            validation fails with the check-digit error. Defaults to the local
+            _default_check_digit (which currently accepts everything).
+
+    Returns:
+        { ok: bool, "normalized": str, "error": str | None }
+    """
+    verifier = check_digit_verifier if check_digit_verifier is not None else _default_check_digit
+
+    normalized = normalize_mynumber(value)
+    if not normalized:
+        return {"ok": False, "normalized": "", "error": "My Number is required"}
+    if not _ALL_DIGITS_RE.match(normalized):
+        return {"ok": False, "normalized": normalized, "error": "My Number must contain only digits"}
+    if len(normalized) != MYNUMBER_LENGTH:
+        return {"ok": False, "normalized": normalized, "error": f"My Number must be {MYNUMBER_LENGTH} digits, got {len(normalized)}"}
+    if _ALL_SAME_RE.match(normalized):
+        return {"ok": False, "normalized": normalized, "error": "My Number is invalid (all digits are the same)"}
+    if normalized[0] == "0":
+        return {"ok": False, "normalized": normalized, "error": "My Number cannot start with 0"}
+    if not verifier(normalized):
+        return {"ok": False, "normalized": normalized, "error": "My Number check digit is invalid"}
+    return {"ok": True, "normalized": normalized, "error": None}
+
+
+# ---------------------------------------------------------------------------
+# Adapter for the eval harness (eval.py expects this signature).
+# ---------------------------------------------------------------------------
+
+def run_workflow(input_data: dict[str, Any]) -> dict[str, Any]:
+    """Adapter: takes the eval harness's input shape, returns validation result.
+
+    Input:  { "mynumber": "<raw My Number string>" }
+    Output: { "ok": bool, "normalized": str, "error": str | None }
+    """
+    return validate_mynumber(input_data.get("mynumber"))

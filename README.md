@@ -150,6 +150,8 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/gstin/` | **India GSTIN** (15 alphanumeric, state code + PAN-style middle, default Z + check) | 100.00 / 100 | [gst.gov.in](https://www.gst.gov.in/) |
 | `examples/swiss-uid/` | **Swiss UID (Unternehmens-Identifikationsnummer)** (CHE/CH/CDF + 9 digits) | 100.00 / 100 | [uid.admin.ch](https://www.uid.admin.ch/) |
 | `examples/au-abn/` | **AU ABN (Australian Business Number)** (XX XXX XXX XXX, 11 digits, mod-89 check per ATO spec) | 100.00 / 100 | [abr.business.gov.au](https://abr.business.gov.au/) |
+| `examples/mx-rfc/` | **Mexico RFC (Registro Federal de Contribuyentes)** (4 letters + 6 digits + 2-3 alphanumeric, SAT verification digit: mod 11 weighted sum [13..2], 0-9 maps to digit, 10 maps to 'A') | 100.00 / 100 | [sat.gob.mx](https://www.sat.gob.mx/) |
+| `examples/jp-mynumber/` | **Japan My Number (個人番号)** (12 digits, mod-11 check with weights [6,5,4,3,2,7,6,5,4,3,2,1], cannot start with 0) | 100.00 / 100 | [soumu.go.jp](https://www.soumu.go.jp/) |
 | `examples/open-notebook/` | **Open Notebook RAG connector** (opt-in, egress-gated, non-throwing, tolerates 4 response shapes) | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/open-notebook.js` |
 | `examples/product-research/` | **Autoresearch primitives** (8 ops: normalizeConfig, renderProgram, decide, TSV I/O) — *the most meta example* | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/product-research.js` |
 

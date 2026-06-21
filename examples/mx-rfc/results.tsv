@@ -1,0 +1,3 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-21T11:22:20Z	baseline	keep	84.6154	0.00	structure-only: 4 letters + 6 digits + 2-3 alphanumeric; check-digit verifier is TODO seam
+2026-06-21T11:22:20Z	iter1	keep	100.0000	0.00	SAT RFC verification digit: mod 11 weighted sum [13..2], 0-9 maps to digit, 10 maps to 'A'; 12-char passes through, 13-char verifies check digit
