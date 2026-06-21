@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-21T07:02:46Z	iter1	keep	100.0000	0.00	implement mod-11 check-digit verifier (DV1 + DV2 per Receita Federal spec, weights [10..2] / [11..2])
