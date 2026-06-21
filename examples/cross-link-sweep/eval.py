@@ -121,9 +121,29 @@ def main() -> int:
 
     if total == max_score:
         print(f"\n✅ ALL CLEAR — every program.md points to the right source repo.")
-        return 0
-    print(f"\n❌ {max_score - total} files still need work.")
-    return 1
+    else:
+        print(f"\n❌ {max_score - total} files still need work.")
+
+    # List examples NOT in the eval_set (those are correctly out of scope).
+    # The eval_set covers the 22 SBOSS-derived examples (A1-AI-Core +
+    # A1-Localization-AM + A1-Localization-RU). Other examples (e.g. cnpj, cpf,
+    # eu-vat, uk-company, us-ein, gstin, swiss-uid, au-abn) reference public
+    # sources (irs.gov, gst.gov.in, uid.admin.ch, abr.business.gov.au, etc.) or
+    # have no Armosphera mirror at all, so they're correctly OUT OF SCOPE.
+    # cross-link-sweep itself is also excluded (no program.md source of truth).
+    import glob
+    in_scope = {entry["file"] for entry in eval_set}
+    out_of_scope = []
+    for prog_md in glob.glob("examples/*/program.md"):
+        if prog_md not in in_scope:
+            out_of_scope.append(prog_md)
+    if out_of_scope:
+        print()
+        print(f"Out of scope ({len(out_of_scope)} program.md files — public sources or no Armosphera mirror):")
+        for p in sorted(out_of_scope):
+            print(f"  · {p}")
+
+    return 0 if total == max_score else 1
 
 
 if __name__ == "__main__":
