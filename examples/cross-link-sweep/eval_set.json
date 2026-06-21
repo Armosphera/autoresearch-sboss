@@ -1,0 +1,112 @@
+[
+  {
+    "file": "examples/model-policy/program.md",
+    "source_module": "src/model-policy.js",
+    "expected_source_repo": "Armosphera/A1-AI-Core"
+  },
+  {
+    "file": "examples/chat-client/program.md",
+    "source_module": "src/chat.js",
+    "expected_source_repo": "Armosphera/A1-AI-Core"
+  },
+  {
+    "file": "examples/settings-store/program.md",
+    "source_module": "src/settings-store.js",
+    "expected_source_repo": "Armosphera/A1-AI-Core"
+  },
+  {
+    "file": "examples/model-catalog/program.md",
+    "source_module": "src/model-catalog.js",
+    "expected_source_repo": "Armosphera/A1-AI-Core"
+  },
+  {
+    "file": "examples/supplemental-sources/program.md",
+    "source_module": "src/supplemental.js",
+    "expected_source_repo": "Armosphera/A1-AI-Core"
+  },
+  {
+    "file": "examples/open-notebook/program.md",
+    "source_module": "src/open-notebook.js",
+    "expected_source_repo": "Armosphera/A1-AI-Core"
+  },
+  {
+    "file": "examples/product-research/program.md",
+    "source_module": "src/product-research.js",
+    "expected_source_repo": "Armosphera/A1-AI-Core"
+  },
+  {
+    "file": "examples/hhvh/program.md",
+    "source_module": "src/localization.js",
+    "expected_source_repo": "Armosphera/A1-Localization-AM"
+  },
+  {
+    "file": "examples/vat-return/program.md",
+    "source_module": "src/vatReturn.js",
+    "expected_source_repo": "Armosphera/A1-Localization-AM"
+  },
+  {
+    "file": "examples/vat-return-form/program.md",
+    "source_module": "src/vatReturn.js",
+    "expected_source_repo": "Armosphera/A1-Localization-AM"
+  },
+  {
+    "file": "examples/payroll-am/program.md",
+    "source_module": "src/armeniaPayroll.js",
+    "expected_source_repo": "Armosphera/A1-Localization-AM"
+  },
+  {
+    "file": "examples/chart-of-accounts-am/program.md",
+    "source_module": "src/armeniaChartOfAccounts.js",
+    "expected_source_repo": "Armosphera/A1-Localization-AM"
+  },
+  {
+    "file": "examples/phone-am/program.md",
+    "source_module": "src/armeniaPhone.js",
+    "expected_source_repo": "Armosphera/A1-Localization-AM"
+  },
+  {
+    "file": "examples/regions-am/program.md",
+    "source_module": "src/armeniaRegions.js",
+    "expected_source_repo": "Armosphera/A1-Localization-AM"
+  },
+  {
+    "file": "examples/einvoice-am/program.md",
+    "source_module": "src/einvoice.js",
+    "expected_source_repo": "Armosphera/A1-Localization-AM"
+  },
+  {
+    "file": "examples/ru-identifiers/program.md",
+    "source_module": "src/inn.js",
+    "expected_source_repo": "Armosphera/A1-Localization-RU"
+  },
+  {
+    "file": "examples/phone-ru/program.md",
+    "source_module": "src/phone.js",
+    "expected_source_repo": "Armosphera/A1-Localization-RU"
+  },
+  {
+    "file": "examples/ru-einvoice/program.md",
+    "source_module": "src/einvoice.js",
+    "expected_source_repo": "Armosphera/A1-Localization-RU"
+  },
+  {
+    "file": "examples/payroll-ru/program.md",
+    "source_module": "src/payroll.js",
+    "expected_source_repo": "Armosphera/A1-Localization-RU"
+  },
+  {
+    "file": "examples/regions-ru/program.md",
+    "source_module": "src/regions.js",
+    "expected_source_repo": "Armosphera/A1-Localization-RU"
+  },
+  {
+    "file": "examples/chart-of-accounts-ru/program.md",
+    "source_module": "src/chartOfAccounts.js",
+    "expected_source_repo": "Armosphera/A1-Localization-RU"
+  },
+  {
+    "file": "examples/vat-ru/program.md",
+    "source_module": "src/vat.js",
+    "expected_source_repo": "Armosphera/A1-Localization-RU"
+  }
+]
