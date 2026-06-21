@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   cut-release:
+    if: false  # disabled 2026-06-21 — repo is private, local CI in ~/dev/armosphera/
     name: cut GitHub release from tag
     runs-on: ubuntu-latest
     steps:

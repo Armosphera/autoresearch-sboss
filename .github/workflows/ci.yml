@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   python-harness:
+    if: false  # disabled 2026-06-21 — repo is private, local CI in ~/dev/armosphera/
     name: python eval harness (uv ${{ matrix.python }})
     runs-on: ubuntu-latest
     strategy:
@@ -43,6 +44,7 @@ jobs:
           test "$(tail -n +2 results.tsv | wc -l)" -ge 1 && echo "results.tsv OK"
 
   karpathy-evals:
+    if: false  # disabled 2026-06-21 — repo is private, local CI in ~/dev/armosphera/
     name: karpathy eval lanes (node ${{ matrix.node }})
     runs-on: ubuntu-latest
     strategy:
@@ -81,6 +83,7 @@ jobs:
           A1_AI_CORE_CACHE_DIR: ${{ runner.temp }}/a1-ai-core
 
   lint:
+    if: false  # disabled 2026-06-21 — repo is private, local CI in ~/dev/armosphera/
     name: lint / format guard
     runs-on: ubuntu-latest
     steps:
@@ -102,6 +105,7 @@ jobs:
         run: uv run ruff format --check . || echo "(ruff format not configured — skipped)"
 
   sub-examples-eval:
+    if: false  # disabled 2026-06-21 — repo is private, local CI in ~/dev/armosphera/
     # Regression gate: every sub-example under examples/* must pass its own
     # eval.py at score >= 100.00. A failure means a change to a shared lib
     # (e.g. _port.py) or an example's workflow.py broke the contract.
