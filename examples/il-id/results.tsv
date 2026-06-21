@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-21T14:12:04Z	baseline	keep	100.0000	0.00	structure-only: 8-9 digits, not all-same; check-digit verifier is TODO seam (il-id: Luhn, tw-ubn: first-digit-non-zero)

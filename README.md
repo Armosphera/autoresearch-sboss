@@ -194,6 +194,10 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/ar-cuit/` | **Argentina CUIT/CUIL** (11 digits, AFIP mod-11 check with weights [5,4,3,2,7,6,5,4,3,2]) | 100.00 / 100 | [afip.gob.ar](https://www.afip.gob.ar/) |
 | `examples/cl-rut/` | **Chile RUT (Rol Único Tributario)** (7-8 digits + check char 0-9/K, SII mod-11 with weights [2,3,4,5,6,7,2,3] applied right-to-left) | 100.00 / 100 | [sii.cl](https://www.sii.cl/) |
 | `examples/sg-uen/` | **Singapore UEN (Unique Entity Number)** (9-10 alphanumeric, ACRA-internal check letter, no public checksum) | 100.00 / 100 | [acra.gov.sg](https://www.acra.gov.sg/) |
+| `examples/in-pan/` | **India PAN (Permanent Account Number)** (10 chars, AAAAA9999A, 4th char is kind code P/C/H/F/A/T/B/L/J/G) | 100.00 / 100 | [incometax.gov.in](https://www.incometax.gov.in/) |
+| `examples/il-id/` | **Israel ID (Teudat Zehut / תעודת זהות)** (9 digits, modified Luhn with weights [1,2,1,2,...]) | 100.00 / 100 | [gov.il](https://www.gov.il/) |
+| `examples/sa-tin/` | **Saudi Arabia TIN (Tax Identification Number)** (10 digits, first digit 3 = VAT-payer or 4 = non-VAT-payer) | 100.00 / 100 | [zatca.gov.sa](https://zatca.gov.sa/) |
+| `examples/tw-ubn/` | **Taiwan UBN (Unified Business Number / 統一編號)** (8 digits, first digit non-zero) | 100.00 / 100 | [moea.gov.tw](https://www.moea.gov.tw/) |
 | `examples/kr-brn/` | **Korea Business Registration Number (사업자등록번호)** (10 digits in 3-2-5 format, no public check digit) | 100.00 / 100 | [nts.go.kr](https://www.nts.go.kr/) |
 | `examples/open-notebook/` | **Open Notebook RAG connector** (opt-in, egress-gated, non-throwing, tolerates 4 response shapes) | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/open-notebook.js` |
 | `examples/product-research/` | **Autoresearch primitives** (8 ops: normalizeConfig, renderProgram, decide, TSV I/O) — *the most meta example* | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/product-research.js` |
