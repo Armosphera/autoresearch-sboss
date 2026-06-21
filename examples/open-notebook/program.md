@@ -8,7 +8,7 @@ exact-match F1 score from `eval.py` goes up. You do not edit `eval.py`, `eval_se
 
 The default `workflow.py` is a faithful Python port of
 `src/open-notebook.js` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core).
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core).
 Open Notebook (lfnovo/open-notebook) — opt-in AI source that sits BESIDE a
 product's local RAG. We connect to a self-hosted instance over its REST API;
 we never bundle its Python/SurrealDB runtime.
