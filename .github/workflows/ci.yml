@@ -58,6 +58,14 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
+      - name: Cache A1-AI-Core clone (across Karpathy runs)
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/a1-ai-core
+          key: a1-ai-core-${{ hashFiles('package.json') }}
+          restore-keys: |
+            a1-ai-core-
+
       - name: Install dependencies (no lockfile present, npm install is correct)
         run: npm install --no-audit --no-fund
 
@@ -67,9 +75,10 @@ jobs:
       - name: Run invoice-extractor-contract lane (100 attempts, --best)
         run: npm run karpathy:run -- invoice-extractor-contract --best 100
         env:
-          # Let scripts/karpathy-eval.mjs clone armosphera/A1-AI-Core into the cache dir itself
-          # (see ensureCachedA1AiCore in scripts/karpathy-eval.mjs).
-          A1_AI_CORE_CACHE_DIR: ${{ github.workspace }}/.a1-ai-core
+          # scripts/karpathy-eval.mjs auto-clones armosphera/A1-AI-Core into A1_AI_CORE_CACHE_DIR.
+          # Keep the cache OUTSIDE the repo (so it never shows as a dirty file in `git status`)
+          # and pin it via actions/cache@v4 across runs.
+          A1_AI_CORE_CACHE_DIR: ${{ runner.temp }}/a1-ai-core
 
   lint:
     name: lint / format guard
