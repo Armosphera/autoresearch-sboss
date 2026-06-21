@@ -8,7 +8,7 @@ exact-match F1 score from `eval.py` goes up. You do not edit `eval.py`, `eval_se
 
 The default `workflow.py` is a faithful Python port of
 `src/supplemental.js` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core).
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core).
 Advisory-only "supplemental sources" policy — e.g. Open Notebook hits shown
 BESIDE a product's authoritative citations. Pure (no I/O).
 
