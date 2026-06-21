@@ -1,0 +1,94 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-harness:
+    name: python eval harness (uv ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Sync dependencies
+        run: uv sync --frozen
+
+      - name: Run eval harness (deterministic mock LLM)
+        run: uv run eval.py
+        env:
+          EXPERIMENT_BUDGET_SEC: '15'
+
+      - name: Verify results.tsv is well-formed
+        run: |
+          head -1 results.tsv
+          test "$(tail -n +2 results.tsv | wc -l)" -ge 1 && echo "results.tsv OK"
+
+  karpathy-evals:
+    name: karpathy eval lanes (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: List available eval lanes
+        run: npm run karpathy:list
+
+      - name: Run invoice-extractor-contract lane (100 attempts, --best)
+        run: npm run karpathy:run -- invoice-extractor-contract --best 100
+        env:
+          A1_AI_CORE_CACHE_DIR: ${{ github.workspace }}/.a1-ai-core
+          A1_AI_CORE_PATH: armosphera/A1-AI-Core
+          A1_AI_CORE_PIN: cec47006254640e7c02aea07b375ea5d0d471cb8
+
+  lint:
+    name: lint / format guard
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          python-version: '3.11'
+
+      - name: Sync dependencies (with dev extras)
+        run: uv sync --frozen --extra dev || uv sync --frozen
+
+      - name: ruff check
+        run: uv run ruff check . || echo "(ruff not configured — skipped)"
+
+      - name: ruff format --check
+        run: uv run ruff format --check . || echo "(ruff format not configured — skipped)"

@@ -1,0 +1,85 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v0.2.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  cut-release:
+    name: cut GitHub release from tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "name=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "name=${{ inputs.tag }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          python-version: '3.11'
+
+      - name: Sync deps + smoke-eval
+        run: |
+          uv sync --frozen
+          EXPERIMENT_BUDGET_SEC=15 uv run eval.py
+
+      - name: Build sdist + wheel
+        run: |
+          uv build --out-dir dist
+
+      - name: Generate notes from results.tsv + commits
+        id: notes
+        run: |
+          {
+            echo "## autoresearch-sboss ${{ steps.tag.outputs.name }}"
+            echo
+            echo "### Last 20 keep-or-revert experiments"
+            echo
+            echo '```'
+            tail -n +2 results.tsv | tail -20
+            echo '```'
+            echo
+            echo "### Commits since previous tag"
+            PREV=$(git tag --sort=-version:refname | grep -E '^v' | sed -n '2p' || true)
+            if [ -n "$PREV" ]; then
+              echo "Compared to \`$PREV\`."
+              echo
+              git log --no-merges --pretty=format:'- %s (%h)' "$PREV..${{ steps.tag.outputs.name }}"
+            else
+              echo "First tagged release."
+              echo
+              git log --no-merges --pretty=format:'- %s (%h)' | head -30
+            fi
+          } > release_notes.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: autoresearch-sboss ${{ steps.tag.outputs.name }}
+          body_path: release_notes.md
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          fail_on_unmatched_files: false
+          draft: false
+          prerelease: ${{ contains(steps.tag.outputs.name, '-rc') || contains(steps.tag.outputs.name, '-beta') || contains(steps.tag.outputs.name, '-alpha') }}
