@@ -1,0 +1,3 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-21T11:53:34Z	baseline	keep	97.2222	0.00	structure-only: 11 digits, all-different, not all-same; check-digit verifier is TODO seam
+2026-06-21T11:53:34Z	iter1	keep	100.0000	0.00	CUIT mod-11 check: weights [5,4,3,2,7,6,5,4,3,2], check = (11 - (sum mod 11)) mod 11; valid case 20-12345678-6 (sum=148)

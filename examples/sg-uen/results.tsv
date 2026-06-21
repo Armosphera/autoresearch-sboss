@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-21T11:55:32Z	baseline	keep	100.0000	0.00	structure-only: 9-10 alphanumeric, not all-same; kind verifier is TODO seam (no public check digit)
