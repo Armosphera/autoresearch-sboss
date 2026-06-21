@@ -8,7 +8,10 @@ import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const a1AiCoreRepo = "https://github.com/SamStep74/A1-AI-Core.git";
+const a1AiCoreRepo = "https://github.com/Armosphera/A1-AI-Core.git";
+// Pinned to the canonical armosphera mirror. Was SamStep74 (the empty
+// original account); the armosphera mirror has identical content +
+// active releases. See A1-portfolio/LICENSING.md for the mirror rationale.
 const a1AiCoreRef = "f917e8a1fd72d48d6e227300a0c069c70ace6f1e";
 
 function runGit(args, options = {}) {
