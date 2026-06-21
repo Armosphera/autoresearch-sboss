@@ -107,9 +107,8 @@ jobs:
     # (e.g. _port.py) or an example's workflow.py broke the contract.
     # Each example is run independently so a single failure doesn't mask others.
     #
-    # Skipped: examples that don't have an eval.py, plus the cross-link-sweep
-    # meta-task (uses GitHub Contents API + prints "score: N / M" instead of
-    # "score: N.MMMM" — not a regression test).
+    # Skipped: examples that don't have an eval.py. cross-link-sweep is
+    # now offline (reads local files) and runs in the gate.
     name: sub-example evals (examples/*)
     runs-on: ubuntu-latest
     steps:
@@ -137,14 +136,6 @@ jobs:
               skip_count=$((skip_count + 1))
               continue
             fi
-            # Skip the cross-link-sweep meta-task: it uses the GitHub Contents
-            # API (needs a token, which CI doesn't have) and prints score in
-            # "N / M" format, not a percentage.
-            if [ "$name" = "cross-link-sweep" ]; then
-              echo "SKIP  $name (meta-task, uses GitHub API, run manually)"
-              skip_count=$((skip_count + 1))
-              continue
-            fi
             # Run the eval. capture stdout, parse the score line.
             set +e
             output=$(cd "$example_dir" && python3 eval.py 2>&1)
@@ -160,7 +151,7 @@ jobs:
             fi
             # Two score formats in use:
             #   1) "score: 100.0000 | elapsed: 0.5s"  (most examples)
-            #   2) "score: 22 / 22 | elapsed: 8.27s"   (cross-link-sweep only)
+            #   2) "score: 22 / 22 | elapsed: 8.27s"   (cross-link-sweep)
             # Handle both.
             score_token=$(echo "$score_line" | awk '{print $2}')
             if echo "$score_line" | grep -qE '^score: [0-9]+ / [0-9]+'; then

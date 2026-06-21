@@ -1,2 +1,2 @@
-0	15.0000	baseline	9.71
-1	22.0	keep	9.71
+timestamp	commit	status	score	budget_sec	description
+2026-06-21T11:10:28Z	iter1	keep	22.0000	0.00	switched to local file reads (no GitHub API needed, runs in CI gate)
