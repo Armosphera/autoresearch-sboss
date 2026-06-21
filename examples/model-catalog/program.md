@@ -8,7 +8,7 @@ exact-match F1 score from `eval.py` goes up. You do not edit `eval.py`, `eval_se
 
 The default `workflow.py` is a faithful Python port of
 `src/model-catalog.js` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core).
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core).
 Live OpenRouter model catalog. Framework-agnostic: the egress gate (`isEgressAllowed`),
 the fetch implementation (`safeFetch`), and the OpenRouter endpoint/attribution
 config are all INJECTED via `run_workflow` input.

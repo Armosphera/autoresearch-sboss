@@ -8,7 +8,7 @@ exact-match F1 score from `eval.py` goes up. You do not edit `eval.py`, `eval_se
 
 The default `workflow.py` is a faithful Python port of
 `src/model-policy.js::resolveModelForRequest()` from
-[@a1/ai](https://github.com/samstep74/A1-AI-Core) (the official SBOSS AI provider core).
+[@a1/ai](https://github.com/Armosphera/A1-AI-Core) (the official SBOSS AI provider core).
 The JS returns ONLY the resolved model id — no provenance. Your job is to make the Python
 implementation **strictly more useful** by adding traceability and (later) richer
 routing logic.
