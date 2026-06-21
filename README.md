@@ -147,6 +147,8 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/cpf/` | **CPF (Brazilian individual taxpayer id)** (XXX.XXX.XXX-XX, mod-11 DV1+DV2 per Receita Federal) | 100.00 / 100 | [gov.br/receitafederal](https://www.gov.br/receitafederal/pt-br) |
 | `examples/uk-company/` | **UK Company Number (Companies House)** (8 digits, or SC/NI/OC/SO/NC/FC/SF/NF + 6 digits) | 100.00 / 100 | [find-and-update.company-information.service.gov.uk](https://find-and-update.company-information.service.gov.uk/) |
 | `examples/us-ein/` | **US EIN (Employer Identification Number)** (XX-XXXXXXX, 9 digits, IRS campus code prefix) | 100.00 / 100 | [irs.gov/ein](https://www.irs.gov/businesses/small-businesses-self-employed/how-eins-work) |
+| `examples/gstin/` | **India GSTIN** (15 alphanumeric, state code + PAN-style middle, default Z + check) | 100.00 / 100 | [gst.gov.in](https://www.gst.gov.in/) |
+| `examples/swiss-uid/` | **Swiss UID (Unternehmens-Identifikationsnummer)** (CHE/CH/CDF + 9 digits) | 100.00 / 100 | [uid.admin.ch](https://www.uid.admin.ch/) |
 | `examples/open-notebook/` | **Open Notebook RAG connector** (opt-in, egress-gated, non-throwing, tolerates 4 response shapes) | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/open-notebook.js` |
 | `examples/product-research/` | **Autoresearch primitives** (8 ops: normalizeConfig, renderProgram, decide, TSV I/O) — *the most meta example* | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/product-research.js` |
 

@@ -1,0 +1,3 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-21T10:09:47Z	baseline	keep	91.6667	0.00	baseline: 15 alnum, no state code check; eval_set had 4-A typo (fixed)
+2026-06-21T10:09:47Z	iter1	keep	100.0000	0.00	implement state code check (2-digit prefix against _VALID_STATE_CODES, 01-37+96+97)

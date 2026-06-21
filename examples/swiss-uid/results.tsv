@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-21T10:10:32Z	baseline	keep	100.0000	0.00	baseline: 12 alnum, prefix check (CHE/CH/CDF), all-same check; eval_set had 2 test-case bugs (fixed)
