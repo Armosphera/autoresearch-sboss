@@ -8,7 +8,7 @@ exact-match F1 score from `eval.py` goes up. You do not edit `eval.py`, `eval_se
 
 The default `workflow.py` is a faithful Python port of
 `src/settings-store.js` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core).
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core).
 Local file-backed AI settings (local-first): the single OpenRouter API key,
 the per-aspect model policy, and the opt-in Open Notebook connector. Stored
 as JSON with 0600 perms in a product-provided data dir.
