@@ -8,7 +8,7 @@ exact-match F1 score from `eval.py` goes up. You do not edit `eval.py`, `eval_se
 
 The default `workflow.py` is a faithful Python port of
 `src/chat.js::createChatClient()` from
-[samstep74/A1-AI-Core](https://github.com/samstep74/A1-AI-Core). An
+[Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core). An
 OpenRouter chat-completions client (OpenAI-compatible) — the single cloud
 generation path for the A1 family. Three methods:
 
