@@ -12,8 +12,10 @@ RFC string (possibly with separators), return a structured `{ ok, normalized, er
 ## Source of truth
 
 - **Public SAT spec**: https://www.sat.gob.mx/ (Servicio de Administración Tributaria)
-- **Format**: 4 letters + 6 digits (YYMMDD) + 3 alphanumeric (homoclave) + optional 13th char (verification digit)
-- **13th-char check**: SAT-published weighted-sum modulo 11 algorithm (not implemented in baseline)
+- **Format**: 4 letters + 6 digits (YYMMDD) + 2 alphanumeric (homoclave base) = 12 chars
+- **13th char** (optional): the verification digit, computed from the first 12 via a
+  weighted-sum modulo 11 algorithm. If the algorithm's check is 10, the 13th char is "A".
+- **Weights**: [13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2] on the first 12 chars (A=10, B=11, ..., Z=35)
 
 ## The loop
 
