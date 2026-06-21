@@ -546,6 +546,8 @@ python3 eval.py             # baseline: 100.00
 # then point an agent at program.md
 ```
 
+| `examples/cross-link-sweep/` | **22-file cross-account link sweep** (SamStep74 -> Armosphera mirror) | 22.0000 / 22 | infra score (not business); baseline 15/22 -> sweep -> 22/22 |
+
 ## Related
 
 - [karpathy/autoresearch](https://github.com/karpathy/autoresearch) — the original
