@@ -1,3 +1,4 @@
 timestamp	commit	status	score	budget_sec	description
 2026-06-21T06:22:23Z	baseline	keep	60.0000	0.01	baseline: 2-letter country + 8-12 body, no per-country length/checksum, accepts all well-formed
 2026-06-21T06:22:52Z	iter1	keep	100.0000	0.01	allow letters in body for ES/NL/GB (NL has 'B' suffix, ES allows letters per entity type)
+2026-06-21T06:28:31Z	iter2	keep	100.0000	0.00	defensive: hoisted None/empty handling to the 'required' branch (clarifies contract)

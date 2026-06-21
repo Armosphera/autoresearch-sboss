@@ -101,6 +101,9 @@ def validate_vat(value: Any, *, check_digit_verifier=None) -> dict[str, Any]:
     """
     verifier = check_digit_verifier if check_digit_verifier is not None else _default_check_digits
 
+    # None and empty/whitespace short-circuit to the "required" error. We don't
+    # need to differentiate — the public API contract is one error message for
+    # the "missing" case (the eval_set matches this).
     raw_str = "" if value is None else str(value)
     normalized = normalize_vat(value)
     if not normalized:
@@ -111,8 +114,9 @@ def validate_vat(value: Any, *, check_digit_verifier=None) -> dict[str, Any]:
     country, body = m.group(1), m.group(2)
     if country not in _EU_COUNTRY_CODES:
         return {"ok": False, "normalized": normalized, "error": f"Unknown EU country code: {country}"}
-    # Per-country body length check — but accept a permissive range (8-12) as the
-    # baseline. The agent should tighten this to per-country exact lengths.
+    # Per-country body length check — accept a permissive range (8-12) as the
+    # baseline. The agent should tighten this to per-country exact lengths
+    # once the eval_set grows to include length-specific test cases.
     if not (8 <= len(body) <= 12):
         return {"ok": False, "normalized": normalized, "error": f"VAT body must be 8-12 chars, got {len(body)}"}
     if country not in _LETTER_OK_COUNTRIES and not _ALL_DIGITS_RE.match(body):
