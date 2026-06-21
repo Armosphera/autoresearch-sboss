@@ -52,6 +52,45 @@ uv run eval.py
 
 If you see `score: 0.NNNN | elapsed: X.Xs`, the harness is working.
 
+## Run all sub-examples
+
+The repo ships with **38 reference examples** (37 SBOSS business workflow targets + 1
+cross-link sweep). Use `scripts/run_evals.py` to run them all and print a summary table:
+
+```bash
+# Run every example, print a summary table
+python scripts/run_evals.py
+
+# Run a single example
+python scripts/run_evals.py ar-cuit
+
+# Run several
+python scripts/run_evals.py ar-cuit cl-rut sg-uen kr-brn
+
+# Strict mode — exit 1 if any example scores below 100
+python scripts/run_evals.py --strict
+
+# JSON output for downstream tools
+python scripts/run_evals.py --json > results.json
+```
+
+The same logic powers the `sub-example evals` job in `.github/workflows/ci.yml`.
+
+## Add a new example
+
+`scripts/new_example.py` generates the 5-file template for a new target:
+
+```bash
+python scripts/new_example.py <name> [--input-key <key>]
+# e.g.
+python scripts/new_example.py ar-cuit --input-key cuit
+```
+
+This creates `examples/<name>/` with `eval.py`, `workflow.py`, `program.md`,
+`eval_set.json`, `results.tsv`. The first run of `eval.py` will be a starter
+score (typically 50-90); the agent's job is to improve it to 100 by editing
+`workflow.py` per the `program.md` charter.
+
 ## Running the agent
 
 Point Claude Code / Codex / Mavis / etc. at `program.md` and let it go (disable all permissions):
