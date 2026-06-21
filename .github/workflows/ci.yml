@@ -67,9 +67,9 @@ jobs:
       - name: Run invoice-extractor-contract lane (100 attempts, --best)
         run: npm run karpathy:run -- invoice-extractor-contract --best 100
         env:
+          # Let scripts/karpathy-eval.mjs clone armosphera/A1-AI-Core into the cache dir itself
+          # (see ensureCachedA1AiCore in scripts/karpathy-eval.mjs).
           A1_AI_CORE_CACHE_DIR: ${{ github.workspace }}/.a1-ai-core
-          A1_AI_CORE_PATH: armosphera/A1-AI-Core
-          A1_AI_CORE_PIN: cec47006254640e7c02aea07b375ea5d0d471cb8
 
   lint:
     name: lint / format guard
