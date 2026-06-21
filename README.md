@@ -145,6 +145,7 @@ follows the same 3-file pattern and can be iterated on independently.
 | `examples/eu-vat/` | **EU VAT (VATIN) validator** (28 EU + GB/NO/CH, per-country length, allow letters in ES/NL/GB body) | 100.00 / 100 | [ec.europa.eu/taxation_customs/vies](https://ec.europa.eu/taxation_customs/vies/) |
 | `examples/cnpj/` | **CNPJ (Brazilian taxpayer id)** (XX.XXX.XXX/XXXX-XX, mod-11 DV1+DV2 per Receita Federal) | 100.00 / 100 | [gov.br/receitafederal](https://www.gov.br/receitafederal/pt-br) |
 | `examples/cpf/` | **CPF (Brazilian individual taxpayer id)** (XXX.XXX.XXX-XX, mod-11 DV1+DV2 per Receita Federal) | 100.00 / 100 | [gov.br/receitafederal](https://www.gov.br/receitafederal/pt-br) |
+| `examples/uk-company/` | **UK Company Number (Companies House)** (8 digits, or SC/NI/OC/SO/NC/FC/SF/NF + 6 digits) | 100.00 / 100 | [find-and-update.company-information.service.gov.uk](https://find-and-update.company-information.service.gov.uk/) |
 | `examples/open-notebook/` | **Open Notebook RAG connector** (opt-in, egress-gated, non-throwing, tolerates 4 response shapes) | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/open-notebook.js` |
 | `examples/product-research/` | **Autoresearch primitives** (8 ops: normalizeConfig, renderProgram, decide, TSV I/O) — *the most meta example* | 100.00 / 100 | [Armosphera/A1-AI-Core](https://github.com/Armosphera/A1-AI-Core) `src/product-research.js` |
 

@@ -1,0 +1,2 @@
+timestamp	commit	status	score	budget_sec	description
+2026-06-21T07:04:11Z	iter1	keep	100.0000	0.00	add all 9 Companies House prefixes (SC, NI, OC, SO, NC, FC, SF, NF)
