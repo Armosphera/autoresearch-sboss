@@ -180,5 +180,135 @@
       "tax_id": null
     },
     "rationale": "Armenian company using American English month format (workflow-supported)"
+  },
+  {
+    "input": {
+      "document": "Israel Tech Ltd\nDate: 15 במאי 2025\nTotal: 5,000 ILS"
+    },
+    "expected": {
+      "vendor_name": "Israel Tech Ltd",
+      "invoice_date": "2025-05-15",
+      "total_amount": 5000,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Hebrew May (15 במאי 2025) — tolerates ב prefix, 5,000 = 5000 (amount uses English keyword — workflow only knows EN/RU amount keywords)"
+  },
+  {
+    "input": {
+      "document": "סטארטאפ בע\"מ\nInvoice № 99\n1 בינואר 2024\nTotal: 10,000 ILS"
+    },
+    "expected": {
+      "vendor_name": "סטארטאפ בע\"מ",
+      "invoice_date": "2024-01-01",
+      "total_amount": 10000,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Hebrew January (1 בינואר 2024) — year boundary (amount uses English keyword — workflow only knows EN/RU amount keywords)"
+  },
+  {
+    "input": {
+      "document": "Tel Aviv Co\nDate: 28 בדצמבר 2024\nTotal: ILS 50,000"
+    },
+    "expected": {
+      "vendor_name": "Tel Aviv Co",
+      "invoice_date": "2024-12-28",
+      "total_amount": 50000,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Hebrew December (28 בדצמבר 2024) — last month, prior year, English vendor"
+  },
+  {
+    "input": {
+      "document": "Jerusalem Inc\nDate: 7 ביולי 2025\nTotal: ILS 12,500"
+    },
+    "expected": {
+      "vendor_name": "Jerusalem Inc",
+      "invoice_date": "2025-07-07",
+      "total_amount": 12500,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Hebrew July (7 ביולי 2025) — 7th day, mid-year"
+  },
+  {
+    "input": {
+      "document": "ქართული კომპანია\nთარიღი: 15 მარტი 2025\nTotal: 1,500 GEL"
+    },
+    "expected": {
+      "vendor_name": "ქართული კომპანია",
+      "invoice_date": "2025-03-15",
+      "total_amount": 1500,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Georgian March (15 მარტი 2025) (amount uses English keyword — workflow only knows EN/RU amount keywords)"
+  },
+  {
+    "input": {
+      "document": "Tbilisi LLC\nთარიღი: 1 იანვარი 2024\nTotal: 10,000 GEL"
+    },
+    "expected": {
+      "vendor_name": "Tbilisi LLC",
+      "invoice_date": "2024-01-01",
+      "total_amount": 10000,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Georgian January (1 იანვარი 2024) (amount uses English keyword — workflow only knows EN/RU amount keywords)"
+  },
+  {
+    "input": {
+      "document": "Georgian Co\nთარიღი: 28 დეკემბერი 2024\nTotal: 25,000 GEL"
+    },
+    "expected": {
+      "vendor_name": "Georgian Co",
+      "invoice_date": "2024-12-28",
+      "total_amount": 25000,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Georgian December (28 დეკემბერი 2024) — last month (amount uses English keyword — workflow only knows EN/RU amount keywords)"
+  },
+  {
+    "input": {
+      "document": "Bakı MMC\nTarix: 15 mart 2025\nTotal: 1,500 AZN"
+    },
+    "expected": {
+      "vendor_name": "Bakı MMC",
+      "invoice_date": "2025-03-15",
+      "total_amount": 1500,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Azerbaijani March (15 mart 2025) (amount uses English keyword — workflow only knows EN/RU amount keywords)"
+  },
+  {
+    "input": {
+      "document": "Azeri Co\nDate: 1 yanvar 2024\nTotal: AZN 10,000"
+    },
+    "expected": {
+      "vendor_name": "Azeri Co",
+      "invoice_date": "2024-01-01",
+      "total_amount": 10000,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Azerbaijani January (1 yanvar 2024)"
+  },
+  {
+    "input": {
+      "document": "Gəncə Ltd\nTarix: 28 dekabr 2024\nTotal: 5,000 AZN"
+    },
+    "expected": {
+      "vendor_name": "Gəncə Ltd",
+      "invoice_date": "2024-12-28",
+      "total_amount": 5000,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Azerbaijani December (28 dekabr 2024) (amount uses English keyword — workflow only knows EN/RU amount keywords)"
   }
 ]

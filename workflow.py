@@ -122,6 +122,32 @@ _RE_DATE_HY_MONTH = re.compile(
     r"\s+(\d{4})\b",
     re.IGNORECASE,
 )
+# Hebrew months (genitive-style, used in formal Israeli invoices).
+# Examples: "15 במאי 2025" = 15 May 2025, "1 בינואר 2024" = 1 January 2024.
+# Hebrew months: tolerates an optional "ב" (in) prefix.
+# Uses (?:^|\s) / (?:\s|$) boundaries because \b doesn't work for Hebrew.
+_RE_DATE_HE_MONTH = re.compile(
+    r"(?:^|\s)(\d{1,2})\s+(?:ב)?"
+    r"(ינואר|פברואר|מרץ|אפריל|מאי|יוני|יולי|אוגוסט|ספטמבר|אוקטובר|נובמבר|דצמבר)"
+    r"\s+(\d{4})(?:\s|$)",
+    re.IGNORECASE,
+)
+# Georgian months in formal case (used in Georgian invoices).
+# Examples: "15 მარტი 2025" = 15 March 2025.
+_RE_DATE_KA_MONTH = re.compile(
+    r"\b(\d{1,2})\s+"
+    r"(იანვარი|თებერვალი|მარტი|აპრილი|მაისი|ივნისი|ივლისი|აგვისტო|სექტემბერი|ოქტომბერი|ნოემბერი|დეკემბერი)"
+    r"\s+(\d{4})\b",
+    re.IGNORECASE,
+)
+# Azerbaijani months (Latin script, genitive).
+# Examples: "15 mart 2025" = 15 March 2025.
+_RE_DATE_AZ_MONTH = re.compile(
+    r"\b(\d{1,2})\s+"
+    r"(yanvar|fevral|mart|aprel|may|iyun|iyul|avqust|sentyabr|oktyabr|noyabr|dekabr)"
+    r"\s+(\d{4})\b",
+    re.IGNORECASE,
+)
 _RE_AMOUNT = re.compile(r"(?:total|amount|sum|итого|всего)\s*[:\-]?\s*([0-9][0-9,\.\s]*)", re.IGNORECASE)
 _RE_AMOUNT_BARE = re.compile(r"\$\s*([0-9][0-9,\.]*)|([0-9][0-9,\.]*)\s*\$")
 _RE_AMOUNT_RUB = re.compile(r"([0-9][0-9,\.\s]*)\s*(?:руб|RUB|р\.)", re.IGNORECASE)
@@ -176,6 +202,21 @@ _HY_MONTHS = {
     "հոկտեմբերի": 10,  # October
     "նոյեմբերի": 11,  # November
     "դեկտեմբերի": 12,  # December
+}
+# Hebrew months (form of name varies; we use common forms in formal invoices).
+_HE_MONTHS = {
+    "ינואר": 1, "פברואר": 2, "מרץ": 3, "אפריל": 4, "מאי": 5, "יוני": 6,
+    "יולי": 7, "אוגוסט": 8, "ספטמבר": 9, "אוקטובר": 10, "נובמבר": 11, "דצמבר": 12,
+}
+# Georgian months.
+_KA_MONTHS = {
+    "იანვარი": 1, "თებერვალი": 2, "მარტი": 3, "აპრილი": 4, "მაისი": 5, "ივნისი": 6,
+    "ივლისი": 7, "აგვისტო": 8, "სექტემბერი": 9, "ოქტომბერი": 10, "ნოემბერი": 11, "დეკემბერი": 12,
+}
+# Azerbaijani months (Latin script, lower-case keys; the regex has IGNORECASE).
+_AZ_MONTHS = {
+    "yanvar": 1, "fevral": 2, "mart": 3, "aprel": 4, "may": 5, "iyun": 6,
+    "iyul": 7, "avqust": 8, "sentyabr": 9, "oktyabr": 10, "noyabr": 11, "dekabr": 12,
 }
 _AMOUNT_LINE_KEYWORDS = (
     "total due", "amount due", "total:", "amount:", "balance due",
@@ -369,6 +410,18 @@ def _run_with_mock(document: str) -> dict[str, Any]:
                         m = _RE_DATE_HY_MONTH.search(document)
                         if m:
                             out["invoice_date"] = _iso(m.group(3), _HY_MONTHS[m.group(2).lower()], m.group(1))
+                        else:
+                            m = _RE_DATE_HE_MONTH.search(document)
+                            if m:
+                                out["invoice_date"] = _iso(m.group(3), _HE_MONTHS[m.group(2)], m.group(1))
+                            else:
+                                m = _RE_DATE_KA_MONTH.search(document)
+                                if m:
+                                    out["invoice_date"] = _iso(m.group(3), _KA_MONTHS[m.group(2)], m.group(1))
+                                else:
+                                    m = _RE_DATE_AZ_MONTH.search(document)
+                                    if m:
+                                        out["invoice_date"] = _iso(m.group(3), _AZ_MONTHS[m.group(2).lower()], m.group(1))
 
     # Prefer the currency attached to the selected total, then use document-level cues.
     amount, currency = _extract_amount_and_currency(document)
