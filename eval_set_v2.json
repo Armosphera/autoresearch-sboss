@@ -1,0 +1,132 @@
+[
+  {
+    "input": {
+      "document": "Bill #1\nDate: 03/04/2025\nTotal: $500"
+    },
+    "expected": {
+      "vendor_name": null,
+      "invoice_date": "2025-03-04",
+      "total_amount": 500,
+      "currency": "USD",
+      "tax_id": null
+    },
+    "rationale": "Day-first per US convention (no Russian/Armenian/EUR cues)"
+  },
+  {
+    "input": {
+      "document": "Globex Industries\nBill to: Initech\nInvoice #42\nTotal: $1,000"
+    },
+    "expected": {
+      "vendor_name": "Globex Industries",
+      "invoice_date": null,
+      "total_amount": 1000,
+      "currency": "USD",
+      "tax_id": null
+    },
+    "rationale": "First non-cue company line wins; 'Bill to' is a skip prefix"
+  },
+  {
+    "input": {
+      "document": "ACME Corp\nSubtotal: $1,000\nTax (10%): $100\nTotal: $1,100"
+    },
+    "expected": {
+      "vendor_name": "ACME Corp",
+      "invoice_date": null,
+      "total_amount": 1100,
+      "currency": "USD",
+      "tax_id": null
+    },
+    "rationale": "Must skip 'Subtotal' and 'Tax' lines, pick 'Total:' line"
+  },
+  {
+    "input": {
+      "document": "ООО ТехноСтрой\nСчёт № 100\nот 15 марта 2025\nИтого: 1 234,50 руб."
+    },
+    "expected": {
+      "vendor_name": "ООО ТехноСтрой",
+      "invoice_date": "2025-03-15",
+      "total_amount": 1234.5,
+      "currency": "RUB",
+      "tax_id": null
+    },
+    "rationale": "1 234,50 → 1234.50 (space stripped, comma = decimal in ru)"
+  },
+  {
+    "input": {
+      "document": "ՀայՀաշվապահ ՓԲԸ\nՀաշիվ № 5\n15 մարտի 2025\nԸնդամենը: 50,000 ֏"
+    },
+    "expected": {
+      "vendor_name": "ՀայՀաշվապահ ՓԲԸ",
+      "invoice_date": null,
+      "total_amount": 50000,
+      "currency": "AMD",
+      "tax_id": null
+    },
+    "rationale": "15 մարտի 2025 = 15 March 2025, ֏ = AMD, 50,000 (no decimal)"
+  },
+  {
+    "input": {
+      "document": "Test Corp\nDate: 03/15/25\nTotal: $999"
+    },
+    "expected": {
+      "vendor_name": "Test Corp",
+      "invoice_date": "2025-03-15",
+      "total_amount": 999,
+      "currency": "USD",
+      "tax_id": null
+    },
+    "rationale": "2-digit year → assume 20xx (per _RE_DATE_SLASH handler)"
+  },
+  {
+    "input": {
+      "document": "Test GmbH\nVAT: DE987654321\nTotal: EUR 500"
+    },
+    "expected": {
+      "vendor_name": "Test GmbH",
+      "invoice_date": null,
+      "total_amount": 500,
+      "currency": "EUR",
+      "tax_id": "DE987654321"
+    },
+    "rationale": "VAT: prefix matches _RE_TAX_ID, DE+9 digits = German VAT"
+  },
+  {
+    "input": {
+      "document": "ACME\nDescription: $1000 services\nTotal: $1000"
+    },
+    "expected": {
+      "vendor_name": "ACME",
+      "invoice_date": null,
+      "total_amount": 1000,
+      "currency": "USD",
+      "tax_id": null
+    },
+    "rationale": "Total: line wins over Description line"
+  },
+  {
+    "input": {
+      "document": ""
+    },
+    "expected": {
+      "vendor_name": null,
+      "invoice_date": null,
+      "total_amount": null,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Empty input → all None (defensive default)"
+  },
+  {
+    "input": {
+      "document": "ACME\nInvoice: 2025-01-15\nSubtotal: EUR 1,000\nTotal: USD 1,100"
+    },
+    "expected": {
+      "vendor_name": "ACME",
+      "invoice_date": "2025-01-15",
+      "total_amount": 1100,
+      "currency": "USD",
+      "tax_id": null
+    },
+    "rationale": "Currency follows the selected total (USD in this case)"
+  }
+]
