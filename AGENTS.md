@@ -1,116 +1,129 @@
-# AGENTS.md — A1-portfolio (cross-repo documentation)
+# AGENTS.md — autoresearch-sboss
 
-This file applies to every agent (human or AI) that touches the `armosphera/A1-portfolio`
-repository. It extends, and never weakens, the global rules in this same repo's
-`LICENSING.md`, `ARCHITECTURE.md`, and `SECURITY.md`.
+This file applies to every agent (human or AI) that touches the
+`armosphera/autoresearch-sboss` repository. It extends, and never weakens, the
+global rules in `https://github.com/Armosphera/A1-portfolio/blob/main/LICENSING.md`.
 
-## 1. What this repo is — and isn't
+## 1. What this repo is
 
-`A1-portfolio` is the **cross-repo documentation source of truth** for the entire A1
-product family. It contains:
+`autoresearch-sboss` is the **reference eval-loop harness** for SBOSS sovereign
+business workflows. MIT-licensed, ported into `A1-Validator`.
 
-- `README.md` — repo index grouped by layer (Engine / Application / Reference)
-- `LICENSING.md` — license matrix across all 9 repos
-- `ARCHITECTURE.md` — layer cake, data flow, open portfolio questions
-- `SECURITY.md` — vulnerability reporting, severity SLAs
+Each agent task is governed by one of two charters:
 
-**This repo has no code, no tests, no CI.** It's documentation. Edits here are edits
-to the *portfolio* — they ripple by being read by humans and agents in every other repo.
+- `program.md` — the eval-loop charter (tune `workflow.py` against `eval.py`)
+- `program-port-validator.md` — the validator-port charter (port a workflow
+  from `examples/<name>/` into `A1-Validator`)
 
-## 2. When to edit this repo
+For "how the pieces fit together" read `docs/ARCHITECTURE.md`.
+For "what to actually do" read the appropriate `program*.md`.
 
-Touch this repo whenever:
+## 2. The 3 files you must NOT touch
 
-1. You add a new A1 repo → update the **Repo index** in `README.md` and the layer cake
-   in `ARCHITECTURE.md`.
-2. You change a license in any repo → update the matrix in `LICENSING.md`. (Per the
-   file's preamble: "If a repo's `LICENSE` file disagrees with this document, the
-   `LICENSE` file wins — but please open an issue so we can resolve the drift.")
-3. You introduce a new cross-repo invariant (e.g. a new pinned SHA, a new eval lane
-   contract, a new sovereignty constraint) → document it in `ARCHITECTURE.md` and link
-   from `SECURITY.md` if it touches security posture.
-4. You change release / tagging convention → update `docs/RELEASE-PROCESS.md` (TODO —
-   does not exist yet).
-5. You change which repo is canonical for a domain → update `docs/PRODUCTS.md` (TODO).
+- **`eval.py`** — fixed eval harness. The judge. Editing it is cheating.
+- **`eval_set.json`** — fixed ground-truth corpus. Editing it is cheating.
+- **`pyproject.toml` `[project]` section** — package metadata. Bumps are
+  operator-driven (release cut), not agent-driven.
 
-## 3. The 4 files you must keep coherent
+You may touch:
 
-These are the load-bearing docs. **All four must agree on the canonical repo list.**
+- `workflow.py` — the agent's lever (only when running `program.md`)
+- `results.tsv` — append-only experiment ledger
+- `examples/<name>/workflow.py` — when running `program-port-validator.md`
 
-- `README.md` — repo index
-- `LICENSING.md` — license matrix table
-- `ARCHITECTURE.md` — layer cake (must show the same repos)
-- `SECURITY.md` — supported versions table
+## 3. Workflow — TDD is N/A (research loop)
 
-If you add a repo, edit all 4. If you deprecate a repo, edit all 4 + open an issue.
-
-## 4. Conventional Commits
+This repo is a **research loop**, not a TDD repo. The loop is:
 
 ```
-<type>(<scope>): <description>
-
-<optional body>
+1. Read results.tsv → current best score
+2. Read workflow.py → current state
+3. Make ONE focused change (red hypothesis)
+4. Run: uv run eval.py
+5. If new_score > best_score → commit (one focused change)
+   Else                     → git checkout workflow.py (revert)
+6. Append row to results.tsv
+7. Repeat
 ```
 
-Allowed types: `docs`, `chore`, `feat` (for new docs sections), `fix` (typos /
-wrong claims), `refactor` (restructuring existing docs).
+**One hypothesis per experiment.** Don't bundle 5 unrelated changes.
 
-- Subject line ≤72 chars, imperative mood, no trailing period.
-- Body explains **why**, not **what** (the diff shows the what).
+## 4. Conventions
 
-## 5. No Code, No Secrets
+- **Conventional commits:** `score: <N.NNN> — <one-line hypothesis>`
+  inside the eval loop. `feat(<area>):` / `fix:` / `docs:` for repo-level changes.
+- **`uv run eval.py`** for evaluation. No `python eval.py` directly.
+- **EXPERIMENT_BUDGET_SEC** default 60s. Override only if eval run exceeds
+  budget — but then the score is invalid, revert.
+- **Real fixtures** in `eval_set.json` — never synthetic.
+- **One validator per commit** when porting. Don't bundle 5 ports.
 
-- This repo has no source code, no tests, no CI. **Don't add any.**
-- No secrets, no API keys, no customer data. If you find one in a PR, reject and rotate.
+## 5. The example-per-validator pattern
 
-## 6. Markdown Discipline
+`examples/` contains 31+ subdirectories, each a self-contained workflow
+example:
 
-- One H1 per file. Use H2 for sections, H3 for subsections.
-- Code blocks must specify language: ` ```bash `, ` ```js `, ` ```python `, etc.
-- Tables use GitHub-flavored markdown alignment (left for text, right for numbers).
-- Internal links use relative paths (`./LICENSING.md`), external links use full URLs.
-- Line length ≤120 chars (Markdown doesn't hard-wrap but keep readable in raw view).
+```
+examples/
+  hhvh/                  # Armenian taxpayer ID (ՀՎՀՀ)
+    workflow.py          # The lever
+    eval_set.json        # The ground truth
+    results.tsv          # The ledger
+  inn/                   # Russian INN/OGRN/OGRNIP/SNILS dispatcher
+  ...
+```
 
-## 7. Drift Detection (TODO)
+The **top-level** `workflow.py` is a "best-of" — the canonical SBOSS workflow
+that the eval loop tunes. Subdirectories in `examples/` are alternatives.
 
-This repo should grow a CI check that:
+When porting via `program-port-validator.md`, the upstream is the
+**top-level** `workflow.py` (or a specific `examples/<name>/` if the upstream
+agent wants a specific feature).
 
-- Compares the repo index in `README.md` against the actual list of repos in the
-  `armosphera` org.
-- Compares the license matrix in `LICENSING.md` against each repo's `LICENSE` file.
-- Compares the architecture layer cake in `ARCHITECTURE.md` against the actual repo
-  descriptions.
+## 6. No debug noise
 
-Add as a Karpathy eval lane: `portfolio-drift-contract`.
+- `print()` is for development only.
+- `breakpoint()` and `pdb.set_trace()` are forbidden in committed code.
+- Comments describing past failures are OK if useful — but **delete them once
+  the fix lands**.
+
+## 7. Cross-repo plumbing
+
+This repo's eval loop is driven by the shared `scripts/karpathy-eval.mjs` from
+downstream consumers (`A1-Suite-Local-ANT`, `A1-Suite-Local-MAX`, etc.). When
+running Karpathy evals, the `A1_AI_CORE_CACHE_DIR` env var points to where
+`armosphera/A1-AI-Core` is cloned for the agent primitive.
+
+Pin the `@a1/ai` SHA per `A1-AI-Core/AGENTS.md` §"Consumer bump checklist" when
+bumping. As of Wave 4+5: pinned to `cec47006` (Wave 4 base), `f917e8a1` (Wave 5
+fix), and `a6be1e8` (Wave 6 fallback-models lane).
 
 ## 8. Day-One Checklist
 
 ```
 1. cat AGENTS.md             # this file
-2. cat README.md             # current repo index
-3. cat LICENSING.md          # current license matrix
-4. cat ARCHITECTURE.md       # current layer cake
-5. cat SECURITY.md           # current policy
-6. Now edit — keep all 4 in sync.
+2. cat program.md             # eval-loop charter (or program-port-validator.md)
+3. cat docs/ARCHITECTURE.md   # how the pieces fit together
+4. ls examples/              # see what validators exist
+5. uv sync                   # install dependencies
+6. uv run eval.py            # confirm baseline works
+7. Now you can edit.
 ```
 
-## 9. Roadmap Items (Track Here)
+If `uv run eval.py` baseline fails: STOP, file an issue. Do not edit around a
+broken baseline.
 
-The following are **known portfolio gaps** that this repo will track:
+## 9. What this repo is NOT
 
-- [ ] `docs/CONTRIBUTING.md` — how to file issues against the right repo
-- [ ] `docs/RELEASE-PROCESS.md` — how releases are cut (tag, notes, publishing)
-- [ ] `docs/PRODUCTS.md` — naming matrix: which repo is canonical for X
-- [ ] AGPL-3.0 dual-license migration for engines (2026 H2)
-- [ ] Portfolio drift CI (drift between docs and actual repos)
-- [ ] Cross-repo evaluation report (which repos have AGENTS.md, program.md,
-      .orchestration/, Karpathy eval lanes — vs which don't)
-
-## 10. Ownership
-
-**Armosphera LLC** · contact: ops@a1-suite.local · security: ops@a1-suite.local
+- **Not** a deterministic validator — it's a harness for *finding* good
+  validators. Deterministic validation lives in `A1-Validator`.
+- **Not** a production codebase — it's a research artifact. Quality of
+  `workflow.py` matters less than quality of the *findings* logged in
+  `results.tsv`.
+- **Not** sovereign-AI product code — for that, see `A1-Suite-Local-{MAX,ANT}`.
 
 ---
 
-*Adapted from `armosphera/SBOS-A1-ERP/AGENTS.md`. Specializes for "this repo IS the
-documentation." License: Proprietary (`LicenseRef-Armosphera-Proprietary`). See `LICENSE`.*
+*Adapted from `armosphera/SBOS-A1-ERP/AGENTS.md`. Specializes for: research-loop
+discipline, 3-protected-files rule, examples-vs-top-level pattern.*
+*License: MIT. See `LICENSE`.*
