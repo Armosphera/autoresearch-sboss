@@ -114,6 +114,14 @@ _RE_DATE_RU_MONTH = re.compile(
     r"\b(\d{1,2})\s+(января|февраля|марта|апреля|мая|июня|июля|августа|сентября|октября|ноября|декабря)\s+(\d{4})\b",
     re.IGNORECASE,
 )
+# Armenian months in genitive case (e.g. "15 մարտի 2025" = 15 March 2025).
+# Mirrors the Russian month structure but in Armenian script.
+_RE_DATE_HY_MONTH = re.compile(
+    r"\b(\d{1,2})\s+"
+    r"(հունվարի|փետրվարի|մարտի|ապրիլի|մայիսի|հունիսի|հուլիսի|օգոստոսի|սեպտեմբերի|հոկտեմբերի|նոյեմբերի|դեկտեմբերի)"
+    r"\s+(\d{4})\b",
+    re.IGNORECASE,
+)
 _RE_AMOUNT = re.compile(r"(?:total|amount|sum|итого|всего)\s*[:\-]?\s*([0-9][0-9,\.\s]*)", re.IGNORECASE)
 _RE_AMOUNT_BARE = re.compile(r"\$\s*([0-9][0-9,\.]*)|([0-9][0-9,\.]*)\s*\$")
 _RE_AMOUNT_RUB = re.compile(r"([0-9][0-9,\.\s]*)\s*(?:руб|RUB|р\.)", re.IGNORECASE)
@@ -152,6 +160,22 @@ _RU_MONTHS = {
     "октября": 10,
     "ноября": 11,
     "декабря": 12,
+}
+_HY_MONTHS = {
+    # Armenian months in genitive case (singular).
+    # "15 մարտի 2025" = 15 March 2025
+    "հունվարի": 1,     # January
+    "փետրվարի": 2,    # February
+    "մարտի": 3,        # March
+    "ապրիլի": 4,      # April
+    "մայիսի": 5,       # May
+    "հունիսի": 6,      # June
+    "հուլիսի": 7,      # July
+    "օգոստոսի": 8,    # August
+    "սեպտեմբերի": 9,  # September
+    "հոկտեմբերի": 10,  # October
+    "նոյեմբերի": 11,  # November
+    "դեկտեմբերի": 12,  # December
 }
 _AMOUNT_LINE_KEYWORDS = (
     "total due", "amount due", "total:", "amount:", "balance due",
@@ -341,6 +365,10 @@ def _run_with_mock(document: str) -> dict[str, Any]:
                     m = _RE_DATE_RU_MONTH.search(document)
                     if m:
                         out["invoice_date"] = _iso(m.group(3), _RU_MONTHS[m.group(2).lower()], m.group(1))
+                    else:
+                        m = _RE_DATE_HY_MONTH.search(document)
+                        if m:
+                            out["invoice_date"] = _iso(m.group(3), _HY_MONTHS[m.group(2).lower()], m.group(1))
 
     # Prefer the currency attached to the selected total, then use document-level cues.
     amount, currency = _extract_amount_and_currency(document)

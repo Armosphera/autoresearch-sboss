@@ -57,7 +57,7 @@
     },
     "expected": {
       "vendor_name": "ՀայՀաշվապահ ՓԲԸ",
-      "invoice_date": null,
+      "invoice_date": "2025-03-15",
       "total_amount": 50000,
       "currency": "AMD",
       "tax_id": null
@@ -128,5 +128,57 @@
       "tax_id": null
     },
     "rationale": "Currency follows the selected total (USD in this case)"
+  },
+  {
+    "input": {
+      "document": "ԱՄՄԲԱՆԴԱԿԸՐՈՒՄ ՍՊԸՍ\nՀաշիվ-ապրանքագիր № 100\nԱմսաթիվ: 1 հունվարի 2025\nԸնդամենը: 100,000 դրամ"
+    },
+    "expected": {
+      "vendor_name": "ԱՄՄԲԱՆԴԱԿԸՐՈՒՄ ՍՊԸՍ",
+      "invoice_date": "2025-01-01",
+      "total_amount": 100000,
+      "currency": "AMD",
+      "tax_id": null
+    },
+    "rationale": "Armenian January '1 հունվարի 2025' — first month, genitive case"
+  },
+  {
+    "input": {
+      "document": "Վարդան Ադամյան ԱՁ\nՀարկային հաշիվ № 99\n15 դեկտեմբերի 2024\nԸնդամենը: 250,000 դրամ"
+    },
+    "expected": {
+      "vendor_name": "Վարդան Ադամյան ԱՁ",
+      "invoice_date": "2024-12-15",
+      "total_amount": 250000,
+      "currency": "AMD",
+      "tax_id": null
+    },
+    "rationale": "Armenian December '15 դեկտեմբերի 2024' — last month, prior year"
+  },
+  {
+    "input": {
+      "document": "ԸՆԿԱՄԱՐՏՆԻԿԱԿԱԼԻԿՈՒՄԸՆ\nՓԱՍՏԱԿԱՆՈՒԹՅՈՒՆ № 7\n7 սեպտեմբերի 2025\nԸնդամենը: 75,000 դրամ"
+    },
+    "expected": {
+      "vendor_name": "ԸՆԿԱՄԱՐՏՆԻԿԱԿԱԼԻԿՈՒՄԸՆ",
+      "invoice_date": "2025-09-07",
+      "total_amount": 75000,
+      "currency": "AMD",
+      "tax_id": null
+    },
+    "rationale": "Armenian September '7 սեպտեմբերի 2025' — 7 = correct day for 2025-09-07"
+  },
+  {
+    "input": {
+      "document": "AM Armenian Inc\nDate: February 28, 2025\nTotal: AMD 500,000"
+    },
+    "expected": {
+      "vendor_name": "AM Armenian Inc",
+      "invoice_date": "2025-02-28",
+      "total_amount": 500000,
+      "currency": "AMD",
+      "tax_id": null
+    },
+    "rationale": "Armenian company using American English month format (workflow-supported)"
   }
 ]
