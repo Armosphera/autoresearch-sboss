@@ -2,3 +2,4 @@ timestamp	commit	status	score	budget_sec	description
 2026-06-20T17:21:08Z	4f60d22	keep	64.0000	0.01	baseline: deterministic regex mock extractor (no LLM, vendor=65 date=70 amount=30 currency=70 tax_id=85)
 2026-06-20T14:07:09Z	b05f738	keep	100.00	0.0	locale-aware deterministic invoice extraction reached perfect fixture score
 2026-06-21T13:06:13Z	d120ea5	keep	100.0000	0.0	karpathy-contract branch re-verified: all 5 fields 100/100, n_items=20, errors=0, no secrets in output
+2026-06-22T03:57:30Z	65afeca2c83c	keep	100.0000	0.0	7-day portfolio health verification (2026-06-22): all invariants hold, exit=0
