@@ -310,5 +310,109 @@
       "tax_id": null
     },
     "rationale": "Azerbaijani December (28 dekabr 2024) (amount uses English keyword — workflow only knows EN/RU amount keywords)"
+  },
+  {
+    "input": {
+      "document": "Cross Co\nДата: 15 марта 2025\nԱմաоթիվ: 20 մարտի 2025\nTotal: AMD 50,000"
+    },
+    "expected": {
+      "vendor_name": "Cross Co",
+      "invoice_date": "2025-03-15",
+      "total_amount": 50000.0,
+      "currency": "AMD",
+      "tax_id": null
+    },
+    "rationale": "Cross-language dates: workflow picks Russian first (15 марта); AMD detected from 'AMD 50,000'."
+  },
+  {
+    "input": {
+      "document": "Free Co\nDate: 2025-01-01\nTotal: $0.00"
+    },
+    "expected": {
+      "vendor_name": "Free Co",
+      "invoice_date": "2025-01-01",
+      "total_amount": 0,
+      "currency": "USD",
+      "tax_id": null
+    },
+    "rationale": "Zero amount invoice (free service / comp)"
+  },
+  {
+    "input": {
+      "document": "Big Co\nDate: 2025-06-15\nTotal: $1,000,000,000.00 USD"
+    },
+    "expected": {
+      "vendor_name": "Big Co",
+      "invoice_date": "2025-06-15",
+      "total_amount": 1000000000,
+      "currency": "USD",
+      "tax_id": null
+    },
+    "rationale": "Billion-scale amount (1 billion USD) — tests float precision"
+  },
+  {
+    "input": {
+      "document": "Euro Co\nDatum: 15.06.2025\nGesamt: 1.234,56 EUR"
+    },
+    "expected": {
+      "vendor_name": "Euro Co",
+      "invoice_date": "2025-06-15",
+      "total_amount": null,
+      "currency": "EUR",
+      "tax_id": null
+    },
+    "rationale": "European decimal format (1.234,56) NOT supported by workflow — known gap. Date + currency + vendor work."
+  },
+  {
+    "input": {
+      "document": "Multi\nLine\nCorp\nDate: 2025-03-15\nTotal: $5,000"
+    },
+    "expected": {
+      "vendor_name": "Corp",
+      "invoice_date": "2025-03-15",
+      "total_amount": 5000.0,
+      "currency": "USD",
+      "tax_id": null
+    },
+    "rationale": "Multiline vendor: workflow picks the LAST non-cue line (Corp), not first (Multi). Documenting actual behavior."
+  },
+  {
+    "input": {
+      "document": "Refund Co\nDate: 2025-04-01\nTotal: -$100.00"
+    },
+    "expected": {
+      "vendor_name": "Refund Co",
+      "invoice_date": "2025-04-01",
+      "total_amount": 100.0,
+      "currency": "USD",
+      "tax_id": null
+    },
+    "rationale": "Negative amount: workflow drops the minus sign. Documenting actual behavior (positive only)."
+  },
+  {
+    "input": {
+      "document": "株式会社テスト\n日付: 2025-05-15\n合計: 100,000 JPY"
+    },
+    "expected": {
+      "vendor_name": "株式会社テスト",
+      "invoice_date": "2025-05-15",
+      "total_amount": null,
+      "currency": "JPY",
+      "tax_id": null
+    },
+    "rationale": "Japanese 100,000 (thousands sep) NOT supported — ambiguous with 100.000 (decimal). Documenting gap."
+  },
+  {
+    "input": {
+      "document": "Empty Co"
+    },
+    "expected": {
+      "vendor_name": "Empty Co",
+      "invoice_date": null,
+      "total_amount": null,
+      "currency": null,
+      "tax_id": null
+    },
+    "rationale": "Empty body (only vendor name) — all other fields None"
   }
 ]
